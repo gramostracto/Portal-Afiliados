@@ -712,7 +712,7 @@ let obtener_dataTransporte = function (tbody, table) {
                     if (value === null || typeof value === 'undefined' || value === '') {
                         return fallback;
                     }
-                    return value;
+                    return window.InvoiceHelpers.escapeHtml(value);
                 };
 
                 const driverName = [detalle.DRIVER_FIRSTNAME, detalle.DRIVER_LASTNAME].filter(Boolean).join(' ');

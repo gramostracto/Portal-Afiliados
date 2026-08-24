@@ -67,6 +67,10 @@ let chartMostConsultedActions = function (login_per_day) {
           // set chart data
           chart.data(chartData);
 
+          // brand color (Tractocar orange)
+          chart.palette(['#e8791a']);
+          chart.hovered().fill('#b85e0f');
+
           // turn on chart animation
           chart.animation(true);
 

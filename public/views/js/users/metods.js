@@ -1,3 +1,12 @@
+const escapeHtml = function (value) {
+    return String(value === null || typeof value === 'undefined' ? '' : value)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+};
+
 // cunsulta de usuarios select2
 let listAffiliate = function (url) {
     $('#customerCode').select2({
@@ -93,11 +102,11 @@ let getUserEliminated = function (urlGetUserElimin) {
                 tableHtml += '<tbody>';
                 data.forEach(function(user) {
                     tableHtml += '<tr>';
-                    tableHtml += '<td>' + user.id + '</td>';
-                    tableHtml += '<td>' + user.email + '</td>';
-                    tableHtml += '<td>' + user.name + '</td>';
-                    tableHtml += '<td>' + user.deleted_at + '</td>';
-                    tableHtml += '<td><button class="btn btn-primary btn-reactivate" data-user-id="' + user.id + '">Restaurar</button></td>';
+                    tableHtml += '<td>' + escapeHtml(user.id) + '</td>';
+                    tableHtml += '<td>' + escapeHtml(user.email) + '</td>';
+                    tableHtml += '<td>' + escapeHtml(user.name) + '</td>';
+                    tableHtml += '<td>' + escapeHtml(user.deleted_at) + '</td>';
+                    tableHtml += '<td><button class="btn btn-primary btn-reactivate" data-user-id="' + escapeHtml(user.id) + '">Restaurar</button></td>';
                     tableHtml += '</tr>';
                 });
                 tableHtml += '</tbody></table>';

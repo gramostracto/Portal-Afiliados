@@ -129,6 +129,10 @@ class PerfilController extends Controller
         $document_id = $request->photo_id;
 
         if (!empty($request->photo_id)) {
+            $request->validate([
+                'photo_id' => 'file|mimes:pdf,jpg,jpeg,png|max:4096',
+            ]);
+
             $pdfPath = $this->storeFile($document_id, 'documet/pdf', Auth::user()->number_id);
 
             User::find(Auth::user()->id)->update([
@@ -236,12 +240,21 @@ class PerfilController extends Controller
 
     public function eliminarUserAsociado($id)
     {
+        $data = DB::table('relationship')
+            ->select('id')
+            ->where('user_id', Auth::user()->id)
+            ->where('user_assigne_id', $id)
+            ->first();
+
+        if (!$data) {
+            return redirect()->route('profile')->with(['message' => 'Wrong ID!!']);
+        }
+
         $dateDaled = DB::table('relationship')->select('deleted_at')->where('user_assigne_id', '=', $id)->get();
         if ($dateDaled->count() > 1) {
             return redirect()->route('profile')->with(['message'=> 'Wrong ID!!']);
         }
         $post = user::find($id)->delete();
-            $data = DB::table('relationship')->select('id')->where('user_assigne_id',$id)->first();
         $post = relationship::find($data->id)->delete();
         if ($post != null) {
             return redirect()->route('profile');
@@ -251,6 +264,15 @@ class PerfilController extends Controller
 
     public function reasignarUserAsociado($id)
     {
+        $ownsRelation = DB::table('relationship')
+            ->where('user_id', Auth::user()->id)
+            ->where('user_assigne_id', $id)
+            ->exists();
+
+        if (!$ownsRelation) {
+            return redirect()->route('profile')->with(['message' => 'Wrong ID!!']);
+        }
+
         DB::table('users')
             ->where('id', $id)
             ->update(['deleted_at' => NULL]);

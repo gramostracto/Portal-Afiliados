@@ -1,76 +1,80 @@
 @extends('layouts.auth_app')
 @section('title')
-     Login
+    Login
 @endsection
 @section('content')
-    <body class="ltr login-img">
-        <!-- CONTAINER OPEN -->
-        <div class="col col-login mx-auto text-center">
-            <a href="" class="text-center">
-                {{-- <img src={{ asset('assets/images/brand/positive-blue-xxlarge-horizontal.png') }} class="header-brand-img" alt=""> --}}
-            </a>
-        </div>
-        <div class="container-login100">
-            <div class="wrap-login100 p-0">
-                <div class="card-body">
-                    <span class="login100-form-title">
-                        @lang('locale.Login')
-                    </span>
-                    <form method="POST" class="login100-form validate-form" action="{{ route('login') }}">
-                        @csrf
-                        <div class="wrap-input100 validate-input">
-                            <input aria-describedby="emailHelpBlock" id="email" type="email"
-                                    class="form-control{{ $errors->has('email') ? ' is-invalid' : '' }} input100" name="email"
-                                    placeholder="@lang('locale.Email')" tabindex="1"
-                                    value="{{ (Cookie::get('email') !== null) ? Cookie::get('email') : old('email') }}" autofocus
-                                    required>
-                                    <div class="invalid-feedback">
-                                        {{ $errors->first('email') }}
-                                    </div>
-                            <span class="focus-input100"></span>
-                            <span class="symbol-input100">
-                                <i class="zmdi zmdi-email" aria-hidden="true"></i>
-                            </span>
-                        </div>
-                        <div class="wrap-input100 validate-input">
-                            <input aria-describedby="passwordHelpBlock" id="password" type="password"
-                                    value="{{ (Cookie::get('password') !== null) ? Cookie::get('password') : null }}"
-                                    placeholder="@lang('locale.Password')"
-                                    class="form-control{{ $errors->has('password') ? ' is-invalid': '' }} input100" name="password"
-                                    tabindex="2" required>
-                                    <div class="invalid-feedback">
-                                        {{ $errors->first('password') }}
-                                    </div>
-                            <span class="focus-input100"></span>
-                            <span class="symbol-input100">
-                                <i class="zmdi zmdi-lock" aria-hidden="true"></i>
-                            </span>
-                        </div>
-                        <div class="text-end pt-1">
-                            <p class="mb-0"><a href="{{ route('forgot-password') }}" class="text-primary ms-1">Has olvidado tu contraseña?</a></p>
-                        </div>
-                        <div class="container-login100-form-btn">
-                            <button type="submit" class="btn btn-primary btn-lg btn-block" tabindex="4">
-                                @lang('locale.Login')
-                            </button>
-                        </div>
-                        <div class="text-center pt-3">
-                            @if (Route::has('register'))
-                                <p class="text-dark mb-0">Ya tienes una cuenta?<a href="{{ route('register') }}" class="text-primary ms-1">@lang('locale.Create an Account')</a></p>
-                            @endif
-                        </div>
-                    </form>
+
+<body id="kt_body" class="auth-page">
+    @include('auth.partials.auth-style')
+
+    <main class="auth-shell">
+        <section class="auth-brand" aria-label="Portal de afiliados Tractocar">
+            <img class="auth-brand-logo" src="{{ asset('assets/images/logos-tractocar/TCL_POS_CMYK-01.png') }}" alt="Tractocar">
+            <h1>Portal de afiliados</h1>
+            <p>Consulta, gestiona y actualiza tu informacion de afiliacion de forma segura.</p>
+        </section>
+
+        <section class="auth-card-wrap" aria-label="Inicio de sesion">
+            <div class="auth-card">
+                <div class="auth-card-header">
+                    <div class="auth-kicker">Acceso seguro</div>
+                    <h2>@lang('locale.Login')</h2>
+                    <p class="auth-card-subtitle">Ingresa con tu correo y contrasena asignada.</p>
                 </div>
+
+                @if (session('alerta-register'))
+                    <div class="auth-status">
+                        Espere a que se verifique su información, esto podría tardar unos minutos, al correo registrado le estará llegando la confirmación.
+                    </div>
+                @endif
+
+                <form method="POST" action="{{ route('login') }}">
+                    @csrf
+                    <div class="auth-field">
+                        <label for="email">@lang('locale.Email')</label>
+                        <input aria-describedby="emailHelpBlock" id="email" type="email"
+                            class="form-control auth-input{{ $errors->has('email') ? ' is-invalid' : '' }}"
+                            name="email" placeholder="nombre@correo.com" tabindex="1"
+                            value="{{ Cookie::get('email') !== null ? Cookie::get('email') : old('email') }}"
+                            autofocus required>
+                        <div class="invalid-feedback">
+                            {{ $errors->first('email') }}
+                        </div>
+                    </div>
+
+                    <div class="auth-field">
+                        <label for="password">@lang('locale.Password')</label>
+                        <input aria-describedby="passwordHelpBlock" id="password" type="password"
+                            value="{{ Cookie::get('password') !== null ? Cookie::get('password') : null }}"
+                            placeholder="Ingresa tu contrasena"
+                            class="form-control auth-input{{ $errors->has('password') ? ' is-invalid' : '' }}"
+                            name="password" tabindex="2" required>
+                        <div class="invalid-feedback">
+                            {{ $errors->first('password') }}
+                        </div>
+                    </div>
+
+                    <div class="auth-meta">
+                        <a href="{{ route('forgot-password') }}" class="auth-link">Has olvidado tu contrasena?</a>
+                    </div>
+
+                    <div class="d-grid">
+                        <button type="submit" class="btn btn-primary auth-submit" tabindex="4">
+                            @lang('locale.Login')
+                        </button>
+                    </div>
+                </form>
+
+                @if (Route::has('register'))
+                    <div class="auth-support text-center">
+                        Ya tienes una cuenta?
+                        <a href="{{ route('register') }}" class="auth-link">@lang('locale.Create an Account')</a>
+                    </div>
+                @endif
             </div>
-        </div>
-    <!-- CONTAINER CLOSED -->
-    </body>
+        </section>
+    </main>
+</body>
 @endsection
 @section('scripts')
- @if(session("alerta-register"))
-    <script>
-        Swal.fire('Espere a que se verifique su información, esto podría tardar unos minutos, al correo registrado le estará llegando la confirmación.')
-    </script>
-@endif
-
 @endsection

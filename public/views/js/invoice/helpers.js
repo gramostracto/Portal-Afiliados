@@ -5,6 +5,13 @@
         day: '2-digit'
     });
 
+    const escapeHtml = (value) => String(value)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+
     const safeText = (value, fallback = 'N/D') => {
         if (value === null || typeof value === 'undefined' || value === '') {
             return fallback;
@@ -12,7 +19,7 @@
         if (value === 'null' || value === 'undefined') {
             return fallback;
         }
-        return value;
+        return escapeHtml(value);
     };
 
     const formatDateValue = (value, fallback = 'N/D') => {
@@ -135,6 +142,7 @@
     };
 
     window.InvoiceHelpers = {
+        escapeHtml,
         safeText,
         formatDateValue,
         formatCurrency,

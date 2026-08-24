@@ -12,6 +12,7 @@ class WebserviceOtmController extends Controller
     //
     public function store(Request $request)
     {
+        $shipmentXid = null;
         try {
             // Process convert XML
             // $xmlContent         = str_replace('otm:', '', $request->getContent());
@@ -20,8 +21,14 @@ class WebserviceOtmController extends Controller
             // $transmissionBody   = $xmlToJson->TransmissionBody;
             // $body               = $transmissionBody->GLogXMLElement;
             // $ReleaseGid = $body->Release->ReleaseGid->Gid->Xid;
-            $xmlContent         = str_replace('otm:', '', $request->getContent());
-            $xmlToJson          = json_decode(json_encode((array)simplexml_load_string($xmlContent), true));
+            $xmlContent = str_replace('otm:', '', $request->getContent());
+
+            // Evita XXE: bloquea la resolución de entidades externas antes de parsear XML no confiable.
+            libxml_set_external_entity_loader(function () {
+                return null;
+            });
+
+            $xmlToJson          = json_decode(json_encode((array)simplexml_load_string($xmlContent, 'SimpleXMLElement', LIBXML_NONET), true));
             $transmissionHeader = $xmlToJson->TransmissionHeader;
             $transmissionBody   = $xmlToJson->TransmissionBody;
             $body               = $transmissionBody->GLogXMLElement;

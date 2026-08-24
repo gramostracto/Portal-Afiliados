@@ -415,9 +415,17 @@
                         url: "{{ route('setting.affiliate') }}",
                         type: "GET",
                         success: function(response) {
+                            const escapeHtml = function (value) {
+                                return String(value === null || typeof value === 'undefined' ? '' : value)
+                                    .replace(/&/g, '&amp;')
+                                    .replace(/</g, '&lt;')
+                                    .replace(/>/g, '&gt;')
+                                    .replace(/"/g, '&quot;')
+                                    .replace(/'/g, '&#39;');
+                            };
                             let options = '<option value="">Seleccione un usuario</option>';
                             $.each(response, function(index, user) {
-                                options += '<option value="' + user.id + '">' + user.name + ' (' + user.number_id + ')</option>';
+                                options += '<option value="' + escapeHtml(user.id) + '">' + escapeHtml(user.name) + ' (' + escapeHtml(user.number_id) + ')</option>';
                             });
                             $('#customerCode').html(options);
                         }

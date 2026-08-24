@@ -38,7 +38,7 @@ class SettingSeeder extends Seeder
             DB::table('portal_settings')->insert([
                 [
                     'name'       => 'oracle_erp_password',
-                    'val'        => Crypt::encryptString('eo!zNswC7wsWLWPwfcXA'),
+                    'val'        => Crypt::encryptString('*fYPHYy9ZhiCHjrpTRWW'),
                     'isEncrypt'  => '1',
                     'created_at' => \Carbon\Carbon::now(),
                     'updated_at' => \Carbon\Carbon::now()

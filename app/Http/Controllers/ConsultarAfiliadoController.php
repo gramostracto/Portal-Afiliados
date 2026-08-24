@@ -51,6 +51,45 @@ class ConsultarAfiliadoController extends Controller
     //? Consulta facturas api
 
 
+    /**
+     * Resuelve el SupplierNumber real del usuario autenticado en ERP, ignorando cualquier
+     * SupplierNumber que llegue en el request (evita IDOR: consultar facturas de otro proveedor).
+     */
+    private function resolveOwnSupplierNumber()
+    {
+        $user = DB::table('relationship')
+            ->leftJoin('users', 'users.id', '=', 'relationship.user_id')
+            ->where('relationship.user_assigne_id',  Auth::user()->id)
+            ->where('relationship.deleted_at', '=', null)
+            ->select('users.number_id')
+            ->first();
+
+        $number_id = $user == null ? Auth::user()->number_id : $user->number_id;
+
+        $params = [
+            'q'        => "(TaxpayerId = '{$this->odataEscape($number_id)}')",
+            'limit'    => '200',
+            'fields'   => 'SupplierNumber',
+            'onlyData' => 'true'
+        ];
+        $response = OracleRestErp::procurementGetSuppliers($params);
+        $res = $response->json();
+
+        if ($res['count'] == 0) {
+            return null;
+        }
+
+        return (float) $res['items'][0]['SupplierNumber'];
+    }
+
+    /**
+     * Escapa comillas simples para valores interpolados en filtros OData (q=...) hacia Oracle.
+     */
+    private function odataEscape($value)
+    {
+        return str_replace("'", "''", (string) $value);
+    }
+
     public function suppliers(Request $request)
     {
         // return response()->json(['success' => true, 'data' => 'hola']);
@@ -151,7 +190,14 @@ class ConsultarAfiliadoController extends Controller
             $NumberInvoice = $request->InvoiceNumber;
         }
         try {
-            $params['q'] = "(SupplierNumber = '{$request->SupplierNumber}') and (InvoiceNumber = '{$NumberInvoice}') and (InvoiceDate {$request->core} '{$request->InvoiceDate}') and (CanceledFlag = '{$request->CanceledFlag}') and (PaidStatus = '{$request->PaidStatus}') and (InvoiceType = '{$request->InvoiceType}') and (ValidationStatus = '{$request->ValidationStatus}') and (InvoiceDate BETWEEN '{$request->startDate}' and '{$request->endDate}')";
+            $ownSupplierNumber = $this->resolveOwnSupplierNumber();
+            if ($ownSupplierNumber === null) {
+                return response()->json(['success' => false, 'data' => 'No se encontro el proveedor'], 404);
+            }
+
+            $core = in_array($request->core, ['=', '>', '<', '>=', '<=', '!='], true) ? $request->core : '=';
+
+            $params['q'] = "(SupplierNumber = '{$ownSupplierNumber}') and (InvoiceNumber = '{$this->odataEscape($NumberInvoice)}') and (InvoiceDate {$core} '{$this->odataEscape($request->InvoiceDate)}') and (CanceledFlag = '{$this->odataEscape($request->CanceledFlag)}') and (PaidStatus = '{$this->odataEscape($request->PaidStatus)}') and (InvoiceType = '{$this->odataEscape($request->InvoiceType)}') and (ValidationStatus = '{$this->odataEscape($request->ValidationStatus)}') and (InvoiceDate BETWEEN '{$this->odataEscape($request->startDate)}' and '{$this->odataEscape($request->endDate)}')";
 
             $invoice = OracleRestErp::getInvoiceSuppliers($params);
 
@@ -201,11 +247,16 @@ class ConsultarAfiliadoController extends Controller
     public function TotalAmount(Request $request)
     {
         try {
+            $ownSupplierNumber = $this->resolveOwnSupplierNumber();
+            if ($ownSupplierNumber === null) {
+                return response()->json(['success' => false, 'data' => 'No se encontro el proveedor'], 404);
+            }
+
             $collection = [];
             foreach ($request->PaidStatus as $key => $PaidStatus) {
 
                 $params = [
-                    'q'        => "(SupplierNumber = '{$request->SupplierNumber}') and (CanceledFlag = false) and (PaidStatus ='{$PaidStatus}')",
+                    'q'        => "(SupplierNumber = '{$ownSupplierNumber}') and (CanceledFlag = false) and (PaidStatus ='{$this->odataEscape($PaidStatus)}')",
                     'fields'   => 'invoiceInstallments:UnpaidAmount',
                     'onlyData' => 'true',
                     'limit'    => '500'
@@ -317,7 +368,7 @@ class ConsultarAfiliadoController extends Controller
         try {
 
             $params = [
-                'q'        => "Supplier LIKE '%{$request->input('q')}%' OR TaxpayerId LIKE '%{$request->input('q')}%'", //*Filtrar por el nombre y numero de cedula
+                'q'        => "Supplier LIKE '%{$this->odataEscape($request->input('q'))}%' OR TaxpayerId LIKE '%{$this->odataEscape($request->input('q'))}%'", //*Filtrar por el nombre y numero de cedula
                 'limit'    => '25',
                 'fields'   => 'Supplier,SupplierNumber',
                 'onlyData' => 'true'
@@ -348,10 +399,14 @@ class ConsultarAfiliadoController extends Controller
                 'onlyData' => 'true',
             ];
 
-            $params['q'] = "(InvoiceId = '{$request->InvoiceId}')";
+            $params['q'] = "(InvoiceId = '{$this->odataEscape($request->InvoiceId)}')";
             $invoice = OracleRestErp::getInvoiceSuppliers($params);
             $invoce =  $invoice->object()->items;
 
+            $ownSupplierNumber = $this->resolveOwnSupplierNumber();
+            if (empty($invoce) || $ownSupplierNumber === null || (float) $invoce[0]->SupplierNumber !== $ownSupplierNumber) {
+                return response()->json(['success' => false, 'data' => 'Algo fallo con la comunicacion'], 403);
+            }
 
             $params = [
                 'fields' => 'PaymentDate',
@@ -516,12 +571,12 @@ class ConsultarAfiliadoController extends Controller
     {
         if ($request->userId != '') {
 
-            $user = DB::table('relationship')
-                ->leftJoin('users', 'users.id', '=', 'relationship.user_id')
+            $relationship = DB::table('relationship')
                 ->where('relationship.user_assigne_id',  $request->userId)
                 ->where('relationship.deleted_at', '=', null)
-                ->select('users.*')
                 ->first();
+
+            $user = $relationship ? User::find($relationship->user_id) : null;
             return response()->json(['success' => true, 'data' => $user]);
         }
         return response()->json(['success' => false, 'data' => 'Algo fallo con la comunicacion']);

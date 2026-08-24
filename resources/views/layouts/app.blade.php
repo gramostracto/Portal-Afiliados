@@ -48,37 +48,38 @@
     {{--
     <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" /> --}}
     <style>
+    :root {
+        /* Tema Tractocar (naranja de marca) - alimenta automaticamente los botones,
+           estados activos y badges del tema vía assets/js/themeColors.js */
+        --primary-bg-color: #e8791a;
+        --primary-bg-hover: #b85e0f;
+        --primary-bg-border: #e8791a;
+    }
+
     .background-image {
         position: absolute;
         top: 0;
         left: 0;
         width: 100%;
-        height: 100%;
-        z-index: -1; /* Coloca la imagen detrás del contenido */
-        opacity: 0.7; /* Ajusta la opacidad de la imagen según sea necesario */
-    }
-
-        .background-image {
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background-image: url('ruta-de-tu-imagen.jpg');
+        max-width: 420px;
+        height: auto;
         z-index: -1;
+        opacity: 0.06;
+        pointer-events: none;
+        user-select: none;
     }
 
     .opacity-animation {
         animation-name: opacityAnimation;
-        animation-duration: 3s;
+        animation-duration: 4s;
         animation-timing-function: ease-in-out;
         animation-iteration-count: infinite;
     }
 
     @keyframes opacityAnimation {
-        0% { opacity: 0.5; }
-        50% { opacity: 0.3; }
-        100% { opacity: 0.5; }
+        0% { opacity: 0.04; }
+        50% { opacity: 0.09; }
+        100% { opacity: 0.04; }
     }
 
 

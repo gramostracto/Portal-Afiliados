@@ -2,8 +2,6 @@
 
 namespace App\Http\Controllers;
 
-// require('../vendor/autoload.php');
-
 use App\Http\Helpers\CommonUtils;
 use App\Models\PortalSetting;
 use Illuminate\Http\Request;
@@ -33,7 +31,6 @@ class Configs extends Controller
 
     public function update(Request $request)
     {
-
         if (!empty($request)) {
             $val = ($request->isEncrypt == 1) ? Crypt::encryptString($request->val) : $request->val;
 
@@ -52,7 +49,6 @@ class Configs extends Controller
 
     public function store(Request $request)
     {
-
         $this->validate($request, [
             'name' => 'required',
             'val' => 'required',
@@ -66,8 +62,7 @@ class Configs extends Controller
     public function listarAfiliados(Request $request)
     {
         $search = $request->input('q', '');
-        
-        // Si no hay término de búsqueda, devolver algunos usuarios iniciales
+
         if (empty($search) || strlen($search) < 2) {
             $users = DB::table('users')
                 ->select('id', 'name', 'number_id')
@@ -77,61 +72,16 @@ class Configs extends Controller
             // Buscar usuarios por nombre o número de identificación
             $users = DB::table('users')
                 ->select('id', 'name', 'number_id')
-                ->where(function($query) use ($search) {
+                ->where(function ($query) use ($search) {
                     $query->where('name', 'like', '%' . $search . '%')
-                          ->orWhere('number_id', 'like', '%' . $search . '%');
+                        ->orWhere('number_id', 'like', '%' . $search . '%');
                 })
                 ->limit(50)
                 ->get();
         }
-        
+
         return response()->json($users);
     }
-
-
-    /* public function countLogin(Request $request)
-    {
-        $start_at = $request->startDate;
-        $end_at = $request->endDate;
-        $year = $request->year;
-
-        // Establecer nombres de meses en español
-        DB::statement("SET lc_time_names = 'es_ES';");
-
-        // Base query
-        $baseQuery = DB::table('user_tracking')
-            ->where('action', 'INICIO SESSION');
-
-        // Aplicar filtros
-        if ($start_at && $end_at) {
-            $baseQuery->whereBetween('created_at', [$start_at, $end_at]);
-        } elseif ($year) {
-            $baseQuery->whereYear('created_at', $year);
-        } else {
-            $baseQuery->whereYear('created_at', Carbon::now()->year);
-        }
-        
-        // Conteo total
-        $login_count = (clone $baseQuery)->count();
-        
-        // Conteo por mes
-        $login_per_day = (clone $baseQuery)
-            ->select(
-                'action',
-                DB::raw('MONTHNAME(created_at) AS month'),
-                DB::raw('MONTH(created_at) AS month_number'),
-                DB::raw('COUNT(*) AS total')
-            )
-            ->groupBy('action', DB::raw('MONTH(created_at)'), DB::raw('MONTHNAME(created_at)'))
-            ->orderBy(DB::raw('MONTH(created_at)'))
-            ->get();
-
-        return response()->json([
-            'success' => true,
-            'data' => $login_count,
-            'login_per_day' => $login_per_day,
-        ]);
-    } */
 
 
     public function countActionHome(Request $request)
@@ -153,35 +103,6 @@ class Configs extends Controller
         return response()->json(['success' => true, 'data' => $arrayActionInvoice]);
     }
 
-    /* public function filter(Request $request)
-    {
-
-        $number_id = $request->numberId;
-        $start_at = $request->startDate;
-        $end_at = $request->endDate;
-
-        if ($number_id != null) {
-
-            DB::statement("SET lc_time_names = 'es_ES';");
-
-            $login_per_day = DB::table('user_tracking')
-            ->select('action', DB::raw('MONTHNAME(created_at) AS month'), DB::raw('MONTH(created_at) AS month_number'), DB::raw('COUNT(*) AS total'))
-            ->where('user_id', $number_id);
-
-            if ($start_at != null && $end_at != null) {
-
-                $login_per_day->whereBetween('created_at', [$start_at, $end_at]);
-            }
-
-            $login_per_day->groupBy('action', 'month', DB::raw('MONTH(created_at)'));
-            $login_per_day->orderBy(DB::raw('MONTH(created_at)'));
-            $user_trackins = $login_per_day->get();
-
-
-        }
-        return response()->json(['success' => true, 'login_per_day' => $user_trackins] );
-    } */
-
     public function configSistem()
     {
         $notificationType = Auth::User()->notifications;
@@ -196,14 +117,13 @@ class Configs extends Controller
 
     public function countLogin(Request $request)
     {
-        // Validar entrada
         $request->validate([
             'startDate' => 'nullable|date',
             'endDate' => 'nullable|date|after_or_equal:startDate',
-            'year' => 'nullable|integer|min:2020|max:'.(date('Y')+1)
+            'year' => 'nullable|integer|min:2020|max:' . (date('Y') + 1)
         ]);
 
-        // Determinar rango de fechas
+
         if ($request->startDate && $request->endDate) {
             $startDate = Carbon::parse($request->startDate)->startOfDay();
             $endDate = Carbon::parse($request->endDate)->endOfDay();
@@ -233,7 +153,7 @@ class Configs extends Controller
             ->where('action', 'CONSULTO FACTURAS')
             ->whereBetween('created_at', [$startDate, $endDate])
             ->count();
-        
+
         return response()->json([
             'success' => true,
             'data' => [
@@ -269,7 +189,7 @@ class Configs extends Controller
         // Preparar datos para el gráfico
         $months = [];
         $counts = [];
-        
+
         foreach ($monthlyData as $data) {
             $months[] = ucfirst($data->month);
             $counts[] = $data->count;
@@ -348,7 +268,7 @@ class Configs extends Controller
             ->skip(($page - 1) * $perPage)
             ->take($perPage)
             ->get()
-            ->map(function($item) {
+            ->map(function ($item) {
                 return [
                     'date' => Carbon::parse($item->created_at)->format('d/m/Y H:i:s'),
                     'type' => $item->action,
@@ -379,7 +299,7 @@ class Configs extends Controller
             ->when($userId, function ($query) use ($userId) {
                 return $query->where('user_id', $userId);
             })
-            ->when($startDate && $endDate, function($query) use ($startDate, $endDate) {
+            ->when($startDate && $endDate, function ($query) use ($startDate, $endDate) {
                 return $query->whereBetween('user_tracking.created_at', [$startDate, $endDate]);
             });
 

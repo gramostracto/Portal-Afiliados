@@ -10,22 +10,22 @@
                         @can('/usuario.index')
                         <img src="{{asset('assets/images/logos-tractocar/TCL_POS_CMYK-01.png')}}" class="background-image background-image opacity-animation" alt="">
                             <div class="app-content main-content mt-0">
-                                <div class="row">
-                                    @php
-                                        $counter = 0;
-                                        $items = [
-                                            0 => ['color' => 'indigo', 'icon' => 'fa fa-user'],
-                                            1 => ['color' => 'primary', 'icon' => 'fa fa-ra'],
-                                            2 => ['color' => 'info', 'icon' => 'fa fa-minus'],
-                                            3 => ['color' => 'cyan', 'icon' => 'fa fa-info'],
-                                        ];
-                                    @endphp
+                                @php
+                                    $counter = 0;
+                                    $items = [
+                                        0 => ['color' => 'indigo', 'icon' => 'fa fa-user'],
+                                        1 => ['color' => 'primary', 'icon' => 'fa fa-ra'],
+                                        2 => ['color' => 'info', 'icon' => 'fa fa-minus'],
+                                        3 => ['color' => 'cyan', 'icon' => 'fa fa-info'],
+                                    ];
+                                @endphp
+                                <div class="row g-3">
                                     @foreach ($request_status as $key => $statu)
                                         <div style="display: none">
                                             {{ $counter = $counter + $statu->count }}
                                         </div>
                                         <div class="col-lg-6 col-sm-12 col-md-6 col-xl-3">
-                                            <div class="card overflow-hidden">
+                                            <div class="card overflow-hidden h-100">
                                                 <div class="card-body">
                                                     <div class="row">
                                                         <div class="col">
@@ -44,41 +44,52 @@
                                         </div>
                                     @endforeach
 
-                                    {{-- <div class="col-lg-12 col-sm-12 col-md-12 col-xl-3"> --}}
-                                    <div class="card overflow-hidden" style="background-color: rgba(255, 255, 255, 0.6);">
-                                        <div class="card-body">
-                                            <div class="row">
-
-                                                <div class="col-lg-6 col-sm-12 col-md-6 col-xl-3">
+                                    <div class="col-lg-6 col-sm-12 col-md-6 col-xl-3">
+                                        <div class="card overflow-hidden h-100">
+                                            <div class="card-body" id="count">
+                                                <div class="row">
                                                     <div class="col">
-                                                        <div id="count">
+                                                        <h3 class="mb-2 fw-semibold">0</h3>
+                                                        <p class="text-muted fs-13 mb-0">TOTAL INICIO SESSION</p>
+                                                    </div>
+                                                    <div class="col col-auto top-icn dash">
+                                                        <div class="counter-icon bg-danger-gradient dash ms-auto box-shadow-danger">
+                                                            <i class="fe fe-trending-up text-white"></i>
                                                         </div>
                                                     </div>
                                                 </div>
-                                                <div class="col-lg-6 col-sm-12 col-md-6 col-xl-3 top-0 start-50">
-                                                    <div class="row">
-                                                        <div class="col">
-                                                            <h3 class="mb-2 fw-semibold">{{ $counter }}</h3>
-                                                            <p class="text-muted fs-13 mb-0">TOTAL AFILIADOS</p>
-                                                        </div>
-                                                        <div class="col col-auto top-icn dash">
-                                                            <div
-                                                                class="counter-icon bg-gray dash ms-auto box-shadow-primary">
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                </div>
-
-                                                <div class="card-body">
-                                                    <h4 class="heading" style="text-align: center;">Numero de inicio de sesion
-                                                        por mes</h4>
-                                                    <div id="containerActionHome"></div>
-                                                </div>
-
                                             </div>
                                         </div>
                                     </div>
-                                    {{-- </div> --}}
+
+                                    <div class="col-lg-6 col-sm-12 col-md-6 col-xl-3">
+                                        <div class="card overflow-hidden h-100">
+                                            <div class="card-body">
+                                                <div class="row">
+                                                    <div class="col">
+                                                        <h3 class="mb-2 fw-semibold">{{ $counter }}</h3>
+                                                        <p class="text-muted fs-13 mb-0">TOTAL AFILIADOS</p>
+                                                    </div>
+                                                    <div class="col col-auto top-icn dash">
+                                                        <div class="counter-icon bg-primary dash ms-auto box-shadow-primary">
+                                                            <i class="fa fa-users"></i>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="row g-3 mt-1">
+                                    <div class="col-12">
+                                        <div class="card overflow-hidden">
+                                            <div class="card-body">
+                                                <h4 class="heading text-center mb-4">Numero de inicio de sesion por mes</h4>
+                                                <div id="containerActionHome" style="min-height: 320px;"></div>
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         @endcan
