@@ -1,5 +1,97 @@
 @extends('layouts.app')
 
+@section('styles')
+    <style>
+        .affiliate-validation .validation-source {
+            align-items: center;
+            border: 1px solid #eef1f6;
+            border-radius: 6px;
+            display: flex;
+            justify-content: space-between;
+            padding: 14px 16px;
+        }
+
+        .affiliate-validation .validation-source-label {
+            color: #344050;
+            font-weight: 700;
+        }
+
+        .affiliate-validation .validation-grid {
+            border: 1px solid #eef1f6;
+            border-radius: 6px;
+            overflow: hidden;
+        }
+
+        .affiliate-validation .validation-row {
+            display: grid;
+            grid-template-columns: 180px repeat(3, minmax(0, 1fr));
+        }
+
+        .affiliate-validation .validation-row + .validation-row {
+            border-top: 1px solid #eef1f6;
+        }
+
+        .affiliate-validation .validation-field,
+        .affiliate-validation .validation-value {
+            padding: 14px 16px;
+        }
+
+        .affiliate-validation .validation-field {
+            align-items: center;
+            background: #f8fafc;
+            display: flex;
+            gap: 10px;
+        }
+
+        .affiliate-validation .validation-icon {
+            align-items: center;
+            background: #fff;
+            border: 1px solid #eef1f6;
+            border-radius: 6px;
+            color: var(--primary-bg-color);
+            display: inline-flex;
+            height: 34px;
+            justify-content: center;
+            width: 34px;
+        }
+
+        .affiliate-validation .validation-field-label,
+        .affiliate-validation .validation-value-source {
+            color: #76839a;
+            display: block;
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+
+        .affiliate-validation .validation-value {
+            border-left: 1px solid #eef1f6;
+            min-width: 0;
+        }
+
+        .affiliate-validation .validation-value a,
+        .affiliate-validation .validation-value span:not(.validation-value-source) {
+            color: #344050;
+            display: block;
+            margin-top: 4px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        @media (max-width: 991.98px) {
+            .affiliate-validation .validation-row {
+                grid-template-columns: 1fr;
+            }
+
+            .affiliate-validation .validation-value {
+                border-left: 0;
+                border-top: 1px solid #eef1f6;
+            }
+        }
+    </style>
+@endsection
+
 @section('content')
 
     <body class="ltr app sidebar-mini light-mode">
@@ -27,69 +119,7 @@
                                             data-bs-original-title="Retroceder">
                                             <i class="fa fa-reply" aria-hidden="true"></i>
                                         </a> --}}
-                                            <div class="table-responsive">
-                                                <table id="file-datatable"
-                                                    class="table table-bordered text-nowrap key-buttons border-bottom  w-100">
-                                                    <thead>
-                                                        <tr>
-                                                            <th class="border-bottom-0">/</th>
-                                                            <th class="border-bottom-0">PORTAL</th>
-                                                            <th class="border-bottom-0">OTM</th>
-                                                            <th class="border-bottom-0">ERP</th>
-                                                        </tr>
-                                                    </thead>
-                                                    <tbody>
-                                                        <tr>
-                                                            <td>CEDULA</td>
-                                                            <td>{{ $arrayResultLocal['number_id'] }}</td>
-                                                            <td>{{ $arrayResultOtm['locationXid'] }}</td>
-                                                            <td>{{ $arrayResultErp['TaxpayerId'] }}</td>
-                                                        </tr>
-                                                        <tr>
-                                                            <td>NOMBRE</td>
-                                                            <td>{{ $arrayResultLocal['name'] }}</td>
-                                                            <td>{{ $arrayResultOtm['fullName'] }}</td>
-                                                            <td>{{ $arrayResultErp['fullName'] }}</td>
-
-                                                        </tr>
-                                                        <tr>
-                                                            <td>EMAIL</td>
-                                                            <td><a href="mailto:{{ $arrayResultLocal['email'] }}">{{ $arrayResultLocal['email'] }}
-                                                                </a></td>
-                                                            <td><a href="mailto:{{ $arrayResultOtm['emailAddress'] }}">{{ $arrayResultOtm['emailAddress'] }}
-                                                                </a></td>
-                                                            <td><a href="mailto:{{ $arrayResultErp['emailAddress'] }}">{{ $arrayResultErp['emailAddress'] }}
-                                                                </a></td>
-
-                                                        </tr>
-                                                        <tr>
-                                                            <td>TELEFONO</td>
-                                                            <td>{{ $arrayResultLocal['phone'] }}</td>
-                                                            <td>{{ $arrayResultOtm['phone'] }}</td>
-                                                            <td>{{ $arrayResultErp['phone'] }}</td>
-
-                                                        </tr>
-                                                        <tr>
-                                                            <td>ESTADO</td>
-                                                            <td>
-                                                                <span
-                                                                    class="badge rounded-pill bg-{{ $arrayResultLocal['estado'] != 'RECHAZADO' ? 'success' : 'danger' }} my-1">{{ $arrayResultLocal['estado'] == 'CONFIRMADO' ? 'ACTIVO' : 'DESACTIVADO' }}
-                                                                </span>
-                                                            </td>
-                                                            <td>
-                                                                <span
-                                                                    class="badge rounded-pill bg-{{ $arrayResultOtm['isActive'] == 1 ? 'success' : 'danger' }} my-1">{{ $arrayResultOtm['isActive'] == 1 ? 'ACTIVO' : 'DESACTIVADO' }}
-                                                                </span>
-                                                            </td>
-                                                            <td>
-                                                                <span
-                                                                    class="badge rounded-pill bg-{{ $arrayResultErp['isActive'] == 'ACTIVE' ? 'success' : 'danger' }} my-1">{{ $arrayResultErp['isActive'] == 'ACTIVE' ? 'ACTIVO' : 'DESACTIVADO' }}
-                                                                </span>
-                                                            </td>
-                                                        </tr>
-                                                    </tbody>
-                                                </table>
-                                            </div>
+                                            @include('usuarios.partials.consulta-afiliado')
                                         </div>
                                     </div>
                                 </div>

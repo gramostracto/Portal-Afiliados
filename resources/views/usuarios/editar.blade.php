@@ -1,5 +1,59 @@
 @extends('layouts.app')
 
+@section('styles')
+    <style>
+        .edit-user-summary,
+        .edit-user-form-card {
+            border: 1px solid #eef1f6;
+            border-radius: 6px;
+            box-shadow: none;
+        }
+
+        .edit-user-summary .avatar {
+            height: 64px;
+            width: 64px;
+        }
+
+        .edit-user-meta {
+            border-top: 1px solid #eef1f6;
+            margin-top: 18px;
+            padding-top: 18px;
+        }
+
+        .edit-user-meta-item {
+            display: flex;
+            justify-content: space-between;
+            gap: 12px;
+            padding: 9px 0;
+        }
+
+        .edit-user-meta-label {
+            color: #76839a;
+            font-size: 12px;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+
+        .edit-user-section-title {
+            color: #344050;
+            font-size: 15px;
+            font-weight: 700;
+            margin-bottom: 14px;
+        }
+
+        .edit-user-section {
+            border-bottom: 1px solid #eef1f6;
+            margin-bottom: 22px;
+            padding-bottom: 10px;
+        }
+
+        .edit-user-section:last-of-type {
+            border-bottom: 0;
+            margin-bottom: 0;
+        }
+    </style>
+@endsection
+
 @section('content')
 
     <body class="ltr app sidebar-mini light-mode">
@@ -8,7 +62,7 @@
                 <div class="main-container container-fluid">
                     <div class="page-header">
                         <div>
-                            <h1 class="page-title">Usuarios</h1>
+                            <h1 class="page-title">Editar Usuario</h1>
                         </div>
                         <div class="ms-auto pageheader-btn">
                             <ol class="breadcrumb">
@@ -17,107 +71,144 @@
                             </ol>
                         </div>
                     </div>
-                    <div class="card">
-                        <div class="row">
-                            <div class="col-lg-12">
-                                <div class="card">
-                                    <div class="card-body">
 
-                                        @if ($errors->any())
-                                            <div class="alert alert-dark alert-dismissible fade show" role="alert">
-                                                <strong>¡Revise los campos!</strong>
-                                                @foreach ($errors->all() as $error)
-                                                    <span class="badge badge-danger">{{ $error }}</span>
-                                                @endforeach
-                                                <button type="button" class="close" data-dismiss="alert"
-                                                    aria-label="Close">
-                                                    <span aria-hidden="true">&times;</span>
-                                                </button>
-                                            </div>
-                                        @endif
+                    @if ($errors->any())
+                        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                            <strong>Revise los campos:</strong>
+                            <ul class="mb-0 mt-2">
+                                @foreach ($errors->all() as $error)
+                                    <li>{{ $error }}</li>
+                                @endforeach
+                            </ul>
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                    @endif
 
-                                        {!! Form::model($user, ['method' => 'PATCH', 'route' => ['usuarios.update', $user->id]]) !!}
-                                        <div class="row">
-                                            <div class="col-xs-12 col-sm-12 col-md-4">
-                                                <div class="form-group">
-                                                    <label for="name">Nombre</label>
-                                                    {!! Form::text('name', null, ['class' => 'form-control']) !!}
+                    <div class="row row-sm">
+                        <div class="col-xl-4 col-lg-5">
+                            <div class="card edit-user-summary">
+                                <div class="card-body text-center">
+                                    @if (empty($user->photo))
+                                        <div class="avatar bg-{{ $user->otherColors(($user->id % 8) + 2) }} text-white rounded-circle mx-auto mb-3">
+                                            {{ strtoupper(substr($user->email, 0, 2)) }}
+                                        </div>
+                                    @else
+                                        @php
+                                            $photoPath = $user->photo;
+                                            if (\Illuminate\Support\Str::startsWith($photoPath, ['http://', 'https://'])) {
+                                                $photoUrl = $photoPath;
+                                            } elseif (\Illuminate\Support\Str::startsWith($photoPath, ['storage/', 'public/'])) {
+                                                $photoUrl = asset($photoPath);
+                                            } else {
+                                                $photoUrl = asset('storage/' . $photoPath);
+                                            }
+                                        @endphp
+                                        <div class="avatar rounded-circle mx-auto mb-3" style="overflow: hidden;">
+                                            <img src="{{ $photoUrl }}" alt="{{ $user->name }}" style="width: 100%; height: 100%; object-fit: cover;">
+                                        </div>
+                                    @endif
+
+                                    <h4 class="mb-1">{{ $user->name }}</h4>
+                                    <a class="text-muted d-block text-truncate" href="mailto:{{ $user->email }}">{{ $user->email }}</a>
+                                    <span class="badge font-weight-semibold bg-{{ $user->badges($user->status) }}-transparent text-{{ $user->badges($user->status) }} mt-3">
+                                        {{ $user->status }}
+                                    </span>
+
+                                    <div class="edit-user-meta text-start">
+                                        <div class="edit-user-meta-item">
+                                            <span class="edit-user-meta-label">Documento</span>
+                                            <span>{{ $user->document_type }} {{ $user->number_id }}</span>
+                                        </div>
+                                        <div class="edit-user-meta-item">
+                                            <span class="edit-user-meta-label">Teléfono</span>
+                                            <span>{{ $user->phone ?: 'Sin teléfono' }}</span>
+                                        </div>
+                                        <div class="edit-user-meta-item">
+                                            <span class="edit-user-meta-label">Rol actual</span>
+                                            <span>{{ count($userRole) ? implode(', ', $userRole) : 'Sin rol' }}</span>
+                                        </div>
+                                    </div>
+
+                                    <a href="{{ route('usuario.index') }}" class="btn btn-outline-secondary w-100 mt-3">
+                                        <i class="fa fa-arrow-left me-1"></i> Volver a usuarios
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-xl-8 col-lg-7">
+                            <div class="card edit-user-form-card">
+                                <div class="card-body">
+                                    {!! Form::model($user, ['method' => 'PATCH', 'route' => ['usuarios.update', $user->id]]) !!}
+                                        <div class="edit-user-section">
+                                            <div class="edit-user-section-title">Datos personales</div>
+                                            <div class="row g-3">
+                                                <div class="col-md-6">
+                                                    <label for="name" class="form-label">Nombre</label>
+                                                    {!! Form::text('name', null, ['class' => 'form-control', 'placeholder' => 'Nombre completo']) !!}
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <label for="email" class="form-label">E-mail</label>
+                                                    {!! Form::email('email', null, ['class' => 'form-control', 'placeholder' => 'correo@empresa.com']) !!}
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <label for="phone" class="form-label">Celular</label>
+                                                    {!! Form::text('phone', null, ['class' => 'form-control', 'maxlength' => 11, 'pattern' => '[0-9]{7,11}', 'inputmode' => 'numeric', 'placeholder' => 'Número de celular']) !!}
                                                 </div>
                                             </div>
-                                            <div class="col-xs-12 col-sm-12 col-md-4">
-                                                <div class="form-group">
-                                                    <label for="email">E-mail</label>
-                                                    {!! Form::text('email', null, ['class' => 'form-control']) !!}
+                                        </div>
+
+                                        <div class="edit-user-section">
+                                            <div class="edit-user-section-title">Identificación y acceso</div>
+                                            <div class="row g-3">
+                                                <div class="col-md-4">
+                                                    <label for="document_type" class="form-label">Tipo identificación</label>
+                                                    {!! Form::select('document_type', ['NIT' => 'NIT', 'CC' => 'Cédula de Ciudadanía'], null, ['class' => 'form-control']) !!}
                                                 </div>
-                                            </div>
-                                            <div class="col-xs-12 col-sm-12 col-md-4">
-                                                <div class="form-group">
-                                                    <label for="phone">Celular</label>
-                                                    {!! Form::text('phone', null, ['class' => 'form-control', 'maxlength' => 11, 'pattern' => '[0-9]{7,11}', 'inputmode' => 'numeric']) !!}
+                                                <div class="col-md-4">
+                                                    <label for="number_id" class="form-label">Número identificación</label>
+                                                    {!! Form::text('number_id', null, ['class' => 'form-control', 'placeholder' => 'Documento']) !!}
                                                 </div>
-                                            </div>
-                                            <div class="col-xs-12 col-sm-12 col-md-3">
-                                                <div class="form-group">
-                                                    <label for="document_type">Tipo identificacion</label>
-                                                    {!! Form::select('document_type', ['NIT' => 'NIT', 'CC' => 'Cedula de Ciudadania'], null, [
-                                                        'class' => 'form-control',
-                                                    ]) !!}
+                                                <div class="col-md-4">
+                                                    <label for="status" class="form-label">Estado</label>
+                                                    {!! Form::select('status', ['NUEVO' => 'NUEVO', 'CONFIRMADO' => 'CONFIRMADO', 'RECHAZADO' => 'RECHAZADO', 'ASOCIADO' => 'ASOCIADO'], null, ['class' => 'form-control']) !!}
                                                 </div>
-                                            </div>
-                                            <div class="col-xs-12 col-sm-12 col-md-3">
-                                                <div class="form-group">
-                                                    <label for="number_id">Numero identificacion</label>
-                                                    {!! Form::text('number_id', null, ['class' => 'form-control']) !!}
-                                                </div>
-                                            </div>
-                                            <div class="col-xs-12 col-sm-12 col-md-3">
-                                                <div class="form-group">
-                                                    <label for="status">Estado</label>
-                                                    {!! Form::select(
-                                                        'status',
-                                                        ['NUEVO' => 'NUEVO', 'CONFIRMADO' => 'CONFIRMADO', 'RECHAZADO' => 'RECHAZADO', 'ASOCIADO' => 'ASOCIADO'],
-                                                        null,
-                                                        ['class' => 'form-control'],
-                                                    ) !!}
-                                                </div>
-                                            </div>
-                                            <div class="col-xs-12 col-sm-12 col-md-3">
-                                                <div class="form-group">
-                                                    <label for="">Roles</label>
+                                                <div class="col-md-6">
+                                                    <label for="roles" class="form-label">Rol</label>
                                                     {!! Form::select('roles[]', $roles, $userRole, ['class' => 'form-control']) !!}
+                                                    <small class="text-muted">El rol Cliente Hijo debe mantener estado ASOCIADO.</small>
                                                 </div>
                                             </div>
+                                        </div>
 
-                                            <button class="btn btn-warning" type="button" data-bs-toggle="collapse"
-                                                data-bs-target="#collapseExample" aria-expanded="false"
-                                                aria-controls="collapseExample">
-                                                Cambiar Contraseña
+                                        <div class="edit-user-section">
+                                            <button class="btn btn-warning-light" type="button" data-bs-toggle="collapse"
+                                                data-bs-target="#collapsePassword" aria-expanded="false"
+                                                aria-controls="collapsePassword">
+                                                <i class="fa fa-key me-1"></i> Cambiar contraseña
                                             </button>
 
-                                            <div class="form-group">
-                                                <div class="collapse" id="collapseExample">
-                                                    <div class="row">
-                                                        <div class="col-xs-12 col-sm-12 col-md-6">
-                                                            <div class="form-group">
-                                                                <label for="password">Password</label>
-                                                                {!! Form::password('password', ['class' => 'form-control']) !!}
-                                                            </div>
-                                                        </div>
-                                                        <div class="col-xs-12 col-sm-12 col-md-6">
-                                                            <div class="form-group">
-                                                                <label for="confirm-password">Confirmar Password</label>
-                                                                {!! Form::password('confirm-password', ['class' => 'form-control']) !!}
-                                                            </div>
-                                                        </div>
+                                            <div class="collapse mt-3" id="collapsePassword">
+                                                <div class="row g-3">
+                                                    <div class="col-md-6">
+                                                        <label for="password" class="form-label">Nueva contraseña</label>
+                                                        {!! Form::password('password', ['class' => 'form-control', 'autocomplete' => 'new-password']) !!}
+                                                    </div>
+                                                    <div class="col-md-6">
+                                                        <label for="confirm-password" class="form-label">Confirmar contraseña</label>
+                                                        {!! Form::password('confirm-password', ['class' => 'form-control', 'autocomplete' => 'new-password']) !!}
                                                     </div>
                                                 </div>
                                             </div>
-
-                                            <button type="submit" class="btn btn-primary">Guardar</button>
-
                                         </div>
-                                        {!! Form::close() !!}
-                                    </div>
+
+                                        <div class="d-flex flex-wrap justify-content-end gap-2">
+                                            <a href="{{ route('usuario.index') }}" class="btn btn-outline-secondary">Cancelar</a>
+                                            <button type="submit" class="btn btn-primary">
+                                                <i class="fa fa-save me-1"></i> Guardar cambios
+                                            </button>
+                                        </div>
+                                    {!! Form::close() !!}
                                 </div>
                             </div>
                         </div>
@@ -127,6 +218,7 @@
         </div>
     </body>
 @endsection
+
 @section('scripts')
     @if (Session::has('message'))
         <script>

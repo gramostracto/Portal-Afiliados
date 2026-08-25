@@ -88,6 +88,20 @@ const refreshUsersResults = function (url, data, button) {
     });
 };
 
+const refreshUsersWithCurrentFilters = function () {
+    const form = $('#filter');
+    refreshUsersResults(form.attr('action'), form.serialize());
+};
+
+const updateSelectedUsersState = function () {
+    const selectedCount = $('.user-select-checkbox:checked').length;
+    const visibleCount = $('.user-select-checkbox').length;
+
+    $('#selectedUsersCount').text(selectedCount + (selectedCount === 1 ? ' seleccionado' : ' seleccionados'));
+    $('#btnDeleteSelectedUsers').prop('disabled', selectedCount === 0);
+    $('#selectAllUsers').prop('checked', visibleCount > 0 && selectedCount === visibleCount);
+};
+
 let filterUsersTable = function () {
     $(document).on('submit', '#filter', function(e) {
         e.preventDefault();
@@ -230,73 +244,137 @@ let reactivate = function (urlReactivate) {
 }
 
 let deletedUser = function (urlDeletedUser) {
+    const swalWithBootstrapButtons = Swal.mixin({
+        customClass: {
+            confirmButton: 'btn btn-success',
+            cancelButton: 'btn btn-danger'
+        },
+        buttonsStyling: false
+    });
 
-    $(document).on("click", ".deletedUser", function(e) {
-        e.preventDefault()
-        let id = this.id
-        const swalWithBootstrapButtons = Swal.mixin({
-            customClass: {
-                confirmButton: 'btn btn-success',
-                cancelButton: 'btn btn-danger'
-            },
-            buttonsStyling: false
-        })
+    const deleteUsers = function (ids) {
+        const total = ids.length;
 
         swalWithBootstrapButtons.fire({
-            title: '¿Estás seguro que deseas eliminar este usuario?',
-            text: "¡No podrás revertir esto, ten en cuenta que los usuarios asociados a este igualmente serán eliminados!",
+            title: total === 1 ? '¿Estás seguro que deseas eliminar este usuario?' : '¿Eliminar usuarios seleccionados?',
+            text: "¡No podrás revertir esto, ten en cuenta que los usuarios asociados a estos igualmente serán eliminados!",
             icon: 'warning',
             showCancelButton: true,
-            confirmButtonText: 'Si, Eliminarlo',
+            confirmButtonText: total === 1 ? 'Si, Eliminarlo' : 'Si, eliminarlos',
             cancelButtonText: 'No, Cancelar!',
             reverseButtons: true
         }).then((result) => {
-            if (result.isConfirmed) {
-                $.ajax({
-                    type: 'DELETE',
-                    url: urlDeletedUser,
-                    data: {
-                        "userId": id
-                    },
-                    headers: {
-                        'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-                    },
-                    success: function(response) {
-                        if (response.success == true) {
-                            swalWithBootstrapButtons.fire(
-                                '¡Eliminado!',
-                                'El usuario ha sido eliminado',
-                                'success'
-                            )
-                        } else {
-                            swalWithBootstrapButtons.fire(
-                                'No se pudo eliminar',
-                                response.message || 'Intenta nuevamente.',
-                                'error'
-                            )
-                        }
-                        window.location.reload();
-                    },
-                    error: function(xhr) {
-                        swalWithBootstrapButtons.fire(
-                            'No se pudo eliminar',
-                            xhr.responseJSON && xhr.responseJSON.message ? xhr.responseJSON.message : 'Intenta nuevamente.',
-                            'error'
-                        )
-                    }
-                });
-
-            } else if (
-                /* Read more about handling dismissals below */
-                result.dismiss === Swal.DismissReason.cancel
-            ) {
+            if (!result.isConfirmed) {
                 swalWithBootstrapButtons.fire(
                     'Cancelado',
-                    'El usuario está seguro :)',
+                    'No se eliminaron usuarios.',
                     'error'
-                )
+                );
+                return;
             }
-        })
+
+            $.ajax({
+                type: 'DELETE',
+                url: urlDeletedUser,
+                data: {
+                    "userIds": ids
+                },
+                headers: {
+                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                },
+                success: function(response) {
+                    if (response.success == true) {
+                        swalWithBootstrapButtons.fire(
+                            '¡Eliminado!',
+                            response.deleted === 1 ? 'El usuario ha sido eliminado' : response.deleted + ' usuarios han sido eliminados',
+                            'success'
+                        );
+                        refreshUsersWithCurrentFilters();
+                    } else {
+                        swalWithBootstrapButtons.fire(
+                            'No se pudo eliminar',
+                            response.message || 'Intenta nuevamente.',
+                            'error'
+                        );
+                    }
+                },
+                error: function(xhr) {
+                    swalWithBootstrapButtons.fire(
+                        'No se pudo eliminar',
+                        xhr.responseJSON && xhr.responseJSON.message ? xhr.responseJSON.message : 'Intenta nuevamente.',
+                        'error'
+                    );
+                }
+            });
+        });
+    };
+
+    $(document).on("click", ".deletedUser", function(e) {
+        e.preventDefault();
+        deleteUsers([this.id]);
+    });
+
+    $(document).on('change', '.user-select-checkbox', function() {
+        updateSelectedUsersState();
+    });
+
+    $(document).on('change', '#selectAllUsers', function() {
+        $('.user-select-checkbox').prop('checked', $(this).is(':checked'));
+        updateSelectedUsersState();
+    });
+
+    $(document).on('click', '#btnDeleteSelectedUsers', function() {
+        const selectedIds = $('.user-select-checkbox:checked').map(function() {
+            return this.value;
+        }).get();
+
+        if (selectedIds.length === 0) {
+            return;
+        }
+
+        deleteUsers(selectedIds);
+    });
+}
+
+let consultarAfiliadoModal = function () {
+    $(document).on('click', '.consultAfiliado', function(e) {
+        e.preventDefault();
+
+        const url = $(this).data('url');
+        const modal = $('#consultAfiliadoModal');
+        const content = $('#consultAfiliadoContent');
+
+        content.html(`
+            <div class="text-center py-5">
+                <i class="fa fa-spinner fa-spin text-primary mb-3" style="font-size: 30px;"></i>
+                <p class="text-muted mb-0">Consultando información...</p>
+            </div>
+        `);
+        modal.modal('show');
+
+        $.ajax({
+            url: url,
+            type: 'GET',
+            success: function(response) {
+                if (response.success && response.html) {
+                    content.html(response.html);
+                    return;
+                }
+
+                content.html(`
+                    <div class="alert alert-warning mb-0">
+                        No se pudo cargar la validación del afiliado.
+                    </div>
+                `);
+            },
+            error: function(xhr) {
+                content.html(`
+                    <div class="alert alert-danger mb-0">
+                        ${escapeHtml(xhr.responseJSON && xhr.responseJSON.message ? xhr.responseJSON.message : 'Algo falló consultando la información.')}
+                    </div>
+                `);
+            }
+        });
     });
 }
 
@@ -420,10 +498,6 @@ let Loader = function() {
     })
 }
 // Fin
-
-$(document).on('click', ".consultAfiliado", function(e) {
-    Loader();
-});
 
 $(document).on("click", "#consultFacturas", function(e) {
     Loader();

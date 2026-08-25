@@ -128,9 +128,106 @@
             padding-top: 14px;
         }
 
+        .user-result-toolbar {
+            align-items: center;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: space-between;
+            margin-bottom: 12px;
+        }
+
+        .affiliate-validation .validation-source {
+            align-items: center;
+            border: 1px solid #eef1f6;
+            border-radius: 6px;
+            display: flex;
+            justify-content: space-between;
+            padding: 14px 16px;
+        }
+
+        .affiliate-validation .validation-source-label {
+            color: #344050;
+            font-weight: 700;
+        }
+
+        .affiliate-validation .validation-grid {
+            border: 1px solid #eef1f6;
+            border-radius: 6px;
+            overflow: hidden;
+        }
+
+        .affiliate-validation .validation-row {
+            display: grid;
+            grid-template-columns: 180px repeat(3, minmax(0, 1fr));
+        }
+
+        .affiliate-validation .validation-row + .validation-row {
+            border-top: 1px solid #eef1f6;
+        }
+
+        .affiliate-validation .validation-field,
+        .affiliate-validation .validation-value {
+            padding: 14px 16px;
+        }
+
+        .affiliate-validation .validation-field {
+            align-items: center;
+            background: #f8fafc;
+            display: flex;
+            gap: 10px;
+        }
+
+        .affiliate-validation .validation-icon {
+            align-items: center;
+            background: #fff;
+            border: 1px solid #eef1f6;
+            border-radius: 6px;
+            color: var(--primary-bg-color);
+            display: inline-flex;
+            height: 34px;
+            justify-content: center;
+            width: 34px;
+        }
+
+        .affiliate-validation .validation-field-label,
+        .affiliate-validation .validation-value-source {
+            color: #76839a;
+            display: block;
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+
+        .affiliate-validation .validation-value {
+            border-left: 1px solid #eef1f6;
+            min-width: 0;
+        }
+
+        .affiliate-validation .validation-value a,
+        .affiliate-validation .validation-value span:not(.validation-value-source) {
+            color: #344050;
+            display: block;
+            margin-top: 4px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
         @media (max-width: 575.98px) {
             .user-result-meta {
                 grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 991.98px) {
+            .affiliate-validation .validation-row {
+                grid-template-columns: 1fr;
+            }
+
+            .affiliate-validation .validation-value {
+                border-left: 0;
+                border-top: 1px solid #eef1f6;
             }
         }
     </style>
@@ -362,6 +459,20 @@
 
                 <!-- ROW OPEN -->
                 <div class="row row-sm" id="usersTableSection">
+                    <div class="col-12">
+                        <div class="user-result-toolbar">
+                            <div class="d-flex align-items-center gap-2">
+                                <label class="custom-control custom-checkbox mb-0">
+                                    <input type="checkbox" class="custom-control-input" id="selectAllUsers">
+                                    <span class="custom-control-label">Seleccionar visibles</span>
+                                </label>
+                                <span class="text-muted tx-12" id="selectedUsersCount">0 seleccionados</span>
+                            </div>
+                            <button type="button" class="btn btn-danger btn-sm" id="btnDeleteSelectedUsers" disabled>
+                                <i class="fa fa-trash me-1"></i> Eliminar seleccionados
+                            </button>
+                        </div>
+                    </div>
                     @forelse ($usuarios as $usuario)
                         @php
                             $photoPath = $usuario->photo ?? '';
@@ -397,6 +508,10 @@
                             <div class="card user-result-card">
                                 <div class="card-body">
                                     <div class="d-flex align-items-start gap-3 mb-3">
+                                        <label class="custom-control custom-checkbox mb-0 mt-1">
+                                            <input type="checkbox" class="custom-control-input user-select-checkbox" value="{{ $usuario->id }}">
+                                            <span class="custom-control-label"></span>
+                                        </label>
                                         @if ($usuario->photo == '')
                                             <div class="avatar avatar-md bg-{{ $usuario->otherColors(($usuario->id % 8) + 2) }} text-white rounded-circle">
                                                 {{ strtoupper(substr($usuario->email, 0, 2)) }}
@@ -445,8 +560,9 @@
                                     </div>
 
                                     <div class="user-result-actions">
-                                        <a href="{{ route('consultar.afiliado', [$usuario->id]) }}"
+                                        <a href="#"
                                             class="btn btn-icon btn-info-light consultAfiliado"
+                                            data-url="{{ route('consultar.afiliado', [$usuario->id]) }}"
                                             data-bs-toggle="tooltip"
                                             data-bs-original-title="Validar Informacion">
                                             <i class="fa fa-user"></i>
@@ -513,6 +629,28 @@
                     @endif
                 </div>
                 <!-- ROW CLOSED -->
+                <div class="modal fade" id="consultAfiliadoModal" tabindex="-1" aria-labelledby="consultAfiliadoModalLabel"
+                    aria-hidden="true">
+                    <div class="modal-dialog modal-xl">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="consultAfiliadoModalLabel">Validar información</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                    aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body" id="consultAfiliadoContent">
+                                <div class="text-center py-5">
+                                    <i class="fa fa-spinner fa-spin text-primary mb-3" style="font-size: 30px;"></i>
+                                    <p class="text-muted mb-0">Consultando información...</p>
+                                </div>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
                 <!-- Modal imagen -->
                 <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel"
                     aria-hidden="true">
@@ -620,6 +758,7 @@
         let url = "{{ route('setting.affiliate') }}"
         listAffiliate(url);
         filterUsersTable();
+        consultarAfiliadoModal();
 
         let urlPassword = "{{ route('enviar-contrasena') }}"
         enviarContrasena(urlPassword);

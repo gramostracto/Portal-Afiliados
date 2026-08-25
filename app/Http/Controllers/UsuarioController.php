@@ -220,7 +220,7 @@ class UsuarioController extends Controller
 
     public function edit($id)
     {
-        $user     = User::find($id);
+        $user     = User::findOrFail($id);
         $roles    = Role::pluck('name', 'name')->all();
         $userRole = $user->roles->pluck('name', 'name')->all();
 
@@ -300,13 +300,39 @@ class UsuarioController extends Controller
 
     public function destroy(Request $request)
     {
-        $user = User::find($request->userId);
-        if (!$user) {
+        $userIds = collect($request->input('userIds', $request->input('userId')))
+            ->filter()
+            ->unique()
+            ->values();
+
+        if ($userIds->isEmpty()) {
+            return response()->json(['success' => false, 'message' => 'No se seleccionaron usuarios'], 422);
+        }
+
+        $deletedCount = 0;
+
+        foreach ($userIds as $userId) {
+            if ($this->deleteUserWithAssociates($userId)) {
+                $deletedCount++;
+            }
+        }
+
+        if ($deletedCount == 0) {
             return response()->json(['success' => false, 'message' => 'Usuario no encontrado'], 404);
         }
 
+        return response()->json(['success' => true, 'deleted' => $deletedCount]);
+    }
+
+    private function deleteUserWithAssociates($userId): bool
+    {
+        $user = User::find($userId);
+        if (!$user) {
+            return false;
+        }
+
         $user->delete();
-        $userShilder = Relationship::where([['user_id', $request->userId], ['deleted_status', '!=', 'INACTIVE']])->select('user_assigne_id')->get();
+        $userShilder = Relationship::where([['user_id', $userId], ['deleted_status', '!=', 'INACTIVE']])->select('user_assigne_id')->get();
 
         if (count($userShilder) > 0) {
 
@@ -321,7 +347,8 @@ class UsuarioController extends Controller
                 }
             }
         }
-        return response()->json(['success' => true]);
+
+        return true;
     }
 
     public function cambiarEstado($idUsuario)

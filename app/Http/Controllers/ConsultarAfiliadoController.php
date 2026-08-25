@@ -479,7 +479,7 @@ class ConsultarAfiliadoController extends Controller
         }
     }
 
-    public function consultaOTM($id)
+    public function consultaOTM(Request $request, $id)
     {
         try {
             $userData = User::find($id);
@@ -567,11 +567,20 @@ class ConsultarAfiliadoController extends Controller
                         'phone'        => null
                     ];
             }
-            return view('usuarios.consultar', [
+            $viewData = [
                 'arrayResultLocal' => $arrayResultLocal,
                 'arrayResultErp'   => $arrayResultErp,
                 'arrayResultOtm'   => $arrayResultOtm
-            ]);
+            ];
+
+            if ($request->ajax()) {
+                return response()->json([
+                    'success' => true,
+                    'html' => view('usuarios.partials.consulta-afiliado', $viewData)->render(),
+                ]);
+            }
+
+            return view('usuarios.consultar', $viewData);
         } catch (\Throwable $th) {
             Log::error(__METHOD__ . '. General error: ' . $th->getMessage());
             session()->flash('message', "Special message goes here");
