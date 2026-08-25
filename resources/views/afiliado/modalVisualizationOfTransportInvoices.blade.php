@@ -17,13 +17,13 @@
                                 <div class="row p-2">
                                     <div class="col-lg-12">
                                         <h5 class="bg-primary col-lg-12 mt-0 p-2 text-center text-white d-sm-inline-block">
-                                            Propietario</h5>
+                                            Owner</h5>
                                         <div class="table-responsive project-invoice">
                                             <table class="table table-bordered table-sm align-middle mb-0">
                                                 <thead class="thead-light">
                                                     <tr>
-                                                        <th>Documento</th>
-                                                        <th>Nombre</th>
+                                                        <th>Document</th>
+                                                        <th>Name</th>
                                                     </tr>
                                                 </thead>
                                                 <tbody id="row1_1"></tbody>
@@ -35,14 +35,14 @@
                                 <div class="row p-2">
                                     <div class="col-lg-12">
                                         <h5 class="bg-info col-lg-12 mt-0 p-2 text-center text-white d-sm-inline-block">
-                                            Conductor</h5>
+                                            Driver</h5>
                                         <div class="table-responsive project-invoice">
                                             <table class="table table-bordered table-sm align-middle mb-0">
                                                 <thead class="thead-light">
                                                     <tr>
-                                                        <th>Documento</th>
-                                                        <th>Nombre</th>
-                                                        <th>Teléfono</th>
+                                                        <th>Document</th>
+                                                        <th>Name</th>
+                                                        <th>Phone</th>
                                                     </tr>
                                                 </thead>
                                                 <tbody id="row2_2"></tbody>
@@ -54,14 +54,14 @@
                                 <div class="row p-2">
                                     <div class="col-lg-12">
                                         <h5 class="bg-warning col-lg-12 mt-0 p-2 text-center text-white d-sm-inline-block">
-                                            Resumen</h5>
+                                            Summary</h5>
                                         <div class="table-responsive project-invoice">
                                             <table class="table table-bordered table-sm align-middle mb-0">
                                                 <thead class="thead-light">
                                                     <tr>
-                                                        <th>Tipo de Operación</th>
-                                                        <th>Estado Envío</th>
-                                                        <th>Estado Anticipo</th>
+                                                        <th>Operation Type</th>
+                                                        <th>Shipment Status</th>
+                                                        <th>Advance Status</th>
                                                     </tr>
                                                 </thead>
                                                 <tbody id="row3_3"></tbody>
@@ -73,19 +73,19 @@
                                 <div class="row p-2">
                                     <div class="col-lg-12">
                                         <h5 class="bg-secondary col-lg-12 mt-0 p-2 text-center text-white d-sm-inline-block">
-                                            Ruta</h5>
+                                            Route</h5>
                                         <div class="table-responsive project-invoice">
                                             <table class="table table-bordered table-sm align-middle mb-0">
                                                 <thead class="thead-light">
                                                     <tr>
-                                                        <th>Ciudad Origen</th>
-                                                        <th>Provincia Origen</th>
-                                                        <th>Dirección Origen</th>
-                                                        <th>Ruta</th>
-                                                        <th>Vía</th>
-                                                        <th>Ciudad Destino</th>
-                                                        <th>Provincia Destino</th>
-                                                        <th>Dirección Destino</th>
+                                                        <th>Origin City</th>
+                                                        <th>Origin Province</th>
+                                                        <th>Origin Address</th>
+                                                        <th>Route</th>
+                                                        <th>Way</th>
+                                                        <th>Destination City</th>
+                                                        <th>Destination Province</th>
+                                                        <th>Destination Address</th>
                                                     </tr>
                                                 </thead>
                                                 <tbody id="row4_4"></tbody>
@@ -97,16 +97,16 @@
                                 <div class="row p-2">
                                     <div class="col-lg-12">
                                         <h5 class="bg-success col-lg-12 mt-0 p-2 text-center text-white d-sm-inline-block">
-                                            Información del Vehículo</h5>
+                                            Vehicle Information</h5>
                                         <div class="table-responsive project-invoice">
                                             <table class="table table-bordered table-sm align-middle mb-0">
                                                 <thead class="thead-light">
                                                     <tr>
-                                                        <th>Matrícula</th>
-                                                        <th>Marca</th>
+                                                        <th>License Plate</th>
+                                                        <th>Make</th>
                                                         <th>Color</th>
-                                                        <th>Modelo</th>
-                                                        <th>Número Trailer</th>
+                                                        <th>Model</th>
+                                                        <th>Trailer Number</th>
                                                     </tr>
                                                 </thead>
                                                 <tbody id="row5_5"></tbody>
@@ -140,7 +140,7 @@
                         </div>
                         <div class="modal-footer">
                             <button type="button" id="closet-modal" class="btn btn-secondary"
-                                data-bs-dismiss="modal">Cerrar</button>
+                                data-bs-dismiss="modal">Close</button>
                         </div>
 
                     </div>

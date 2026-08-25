@@ -9,7 +9,7 @@
                                 <span class="sr-only">Loading...</span>
                             </div>
                         </h3>
-                        <p class="text-muted fs-13 mb-0">Monto de Facturas por Pagar</p>
+                        <p class="text-muted fs-13 mb-0">Amount of Invoices Due</p>
                     </div>
                     <div class="col col-auto top-icn dash">
                         <div class="counter-icon bg-secondary dash ms-auto box-shadow-secondary">
@@ -34,7 +34,7 @@
                                 <span class="sr-only">Loading...</span>
                             </div>
                         </h3>
-                        <p class="text-muted fs-13 mb-0">Facturas por Pagar</p>
+                        <p class="text-muted fs-13 mb-0">Invoices Due</p>
                     </div>
                     <div class="col col-auto top-icn dash">
                         <div class="counter-icon bg-warning dash ms-auto box-shadow-warning">

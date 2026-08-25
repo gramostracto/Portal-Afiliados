@@ -16,23 +16,23 @@
                             <div class="card-body" id="body">
                                 <div class="row p-2">
                                     <div class="col-lg-12">
-                                        {{-- <h5 class="btn btn-outline-primary" for="btn-check-outlined"> Detalles
+                                        {{-- <h5 class="btn btn-outline-primary" for="btn-check-outlined"> Details
                                         </h5> --}}
                                         <h5 class="bg-info col-lg-12 mt-0 p-2 text-center text-white d-sm-inline-block">
-                                            Resumen</h5>
+                                            Summary</h5>
                                         <div class="table-responsive project-invoice" style="max-height: 320px; overflow-y: auto;">
                                             <table class="table table-bordered table-sm align-middle mb-0">
                                                 <thead class="thead-light">
                                                     <tr>
-                                                        <th>Tipo de factura</th>
-                                                        <th>Estado de pago</th>
-                                                        <th>Estado de validación</th>
-                                                        <th>Numero de cuenta</th>
-                                                        {{-- <th>Categoría de documento</th>
-                                                        <th>Secuencia de documento</th> --}}
-                                                        <th>Fecha Contable</th>
-                                                        <th>Fecha de Vencimiento</th>
-                                                        <th>Fecha Pago</th>
+                                                        <th>Invoice Type</th>
+                                                        <th>Payment Status</th>
+                                                        <th>Validation Status</th>
+                                                        <th>Account Number</th>
+                                                        {{-- <th>Document Category</th>
+                                                        <th>Document Sequence</th> --}}
+                                                        <th>Accounting Date</th>
+                                                        <th>Due Date</th>
+                                                        <th>Payment Date</th>
                                                     </tr>
                                                     <!--end tr-->
                                                 </thead>
@@ -53,7 +53,7 @@
                                     <div class="col-lg-12">
                                         <h5
                                             class="bg-success col-lg-12 mt-0 p-2 text-center text-white d-sm-inline-block">
-                                            Descripción </h5>
+                                            Description </h5>
 
                                         <div class="table-responsive project-invoice">
                                             <table class="table table-bordered table-sm align-middle mb-0">
@@ -81,16 +81,16 @@
                                     <div class="col-lg-12">
                                         <h5
                                             class="bg-danger col-lg-12 mt-0 p-2 text-center text-white d-sm-inline-block">
-                                            Bloqueos </h5>
+                                            Holds </h5>
 
                                         <div class="table-responsive project-invoice">
                                             <table class="table table-bordered table-sm align-middle mb-0">
                                                 <thead class="thead-light">
                                                     <tr>
-                                                        <th>Nombre Retencion</th>
-                                                        <th>Razón Retencion</th>
-                                                        <th>Retenida Por</th>
-                                                        <th>Fecha Retencion</th>
+                                                        <th>Hold Name</th>
+                                                        <th>Hold Reason</th>
+                                                        <th>Held By</th>
+                                                        <th>Hold Date</th>
                                                     </tr>
                                                     <!--end tr-->
                                                 </thead>
@@ -131,7 +131,7 @@
                         </div>
                         <div class="modal-footer">
                             <button type="button" id="closet-modal" class="btn btn-secondary"
-                                data-bs-dismiss="modal">Cerrar</button>
+                                data-bs-dismiss="modal">Close</button>
                         </div>
                     </div>
                     <!--end card-->
