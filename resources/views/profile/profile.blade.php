@@ -62,13 +62,13 @@
                                             <div class="tabs-menu1">
                                                 <ul class="nav">
                                                     <li><a href="#profileMain" class="active show"
-                                                            data-bs-toggle="tab">Perfil</a></li>
-                                                    <li><a href="#editProfile" data-bs-toggle="tab">Editar Perfil</a></li>
+                                                            data-bs-toggle="tab"><i class="fe fe-user me-2"></i>Perfil</a></li>
+                                                    <li><a href="#editProfile" data-bs-toggle="tab"><i class="fe fe-edit-2 me-2"></i>Editar Perfil</a></li>
                                                     @can('/facturas')
                                                         @if ($user->status != 'ASOCIADO')
-                                                            <li><a href="#friends" data-bs-toggle="tab">Usuarios Asociados</a>
+                                                            <li><a href="#friends" data-bs-toggle="tab"><i class="fe fe-users me-2"></i>Usuarios Asociados</a>
                                                             </li>
-                                                            <li><a href="#accountSettings" data-bs-toggle="tab">Registrar
+                                                            <li><a href="#accountSettings" data-bs-toggle="tab"><i class="fe fe-user-plus me-2"></i>Registrar
                                                                     Usuario</a>
                                                             </li>
                                                         @endif
@@ -84,24 +84,43 @@
                                     <div class="card">
                                         <div class="card-body p-0">
                                             <div class="border-top"></div>
-                                            <div class="table-responsive p-5">
-                                                <h3 class="card-title">Informacion personal</h3>
-                                                <table class="table row table-borderless">
-                                                    <tbody class="col-lg-12 col-xl-6 p-0">
-                                                        <tr>
-                                                            <td><strong>Nombre :</strong>{{ $user->name }}</td>
-                                                        </tr>
-                                                        <tr>
-                                                            <td><strong>Email :</strong> {{ $user->email }}</td>
-                                                        </tr>
-                                                        <tr>
-                                                            <td><strong>Phone :</strong>
-                                                                {{ empty($user->phone) ? '0000000000' : $user->phone }}
-                                                            </td>
-                                                        </tr>
-                                                    </tbody>
-
-                                                </table>
+                                            <div class="p-5">
+                                                <h3 class="card-title mb-4">Informacion personal</h3>
+                                                <div class="row row-sm">
+                                                    <div class="col-lg-12 col-xl-6">
+                                                        <div class="media mb-4">
+                                                            <div class="media-icon bg-primary me-3">
+                                                                <i class="fe fe-user fs-16 text-white"></i>
+                                                            </div>
+                                                            <div class="media-body">
+                                                                <span class="text-muted d-block">Nombre</span>
+                                                                <span class="fw-semibold">{{ $user->name }}</span>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-lg-12 col-xl-6">
+                                                        <div class="media mb-4">
+                                                            <div class="media-icon bg-info me-3">
+                                                                <i class="fe fe-mail fs-16 text-white"></i>
+                                                            </div>
+                                                            <div class="media-body">
+                                                                <span class="text-muted d-block">Email</span>
+                                                                <span class="fw-semibold">{{ $user->email }}</span>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-lg-12 col-xl-6">
+                                                        <div class="media mb-4">
+                                                            <div class="media-icon bg-success me-3">
+                                                                <i class="fe fe-phone fs-16 text-white"></i>
+                                                            </div>
+                                                            <div class="media-body">
+                                                                <span class="text-muted d-block">Telefono</span>
+                                                                <span class="fw-semibold">{{ empty($user->phone) ? 'Sin registrar' : $user->phone }}</span>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
                                             </div>
 
                                         </div>
@@ -120,8 +139,13 @@
                                                 <form id="photo-profile-form" method="POST" action="{{ route('photo-profile.updatePhoto') }}" enctype="multipart/form-data">
                                                     @csrf
                                                     <div class="card-body">
-                                                        <div class="input-group mb-3">
-                                                                <input type="file" class="form-control" name="profile_image" aria-describedby="inputGroupFileAddon01">
+                                                        <div class="d-flex align-items-center mb-3">
+                                                            <img id="photo-profile-preview" class="avatar avatar-lg rounded me-3"
+                                                                src="{{ $user->photo ? asset('storage/' . $user->photo) : asset('img/logo.png') }}"
+                                                                alt="Vista previa">
+                                                            <div class="input-group">
+                                                                <input type="file" class="form-control" name="profile_image" accept="image/*" id="photo-profile-input" aria-describedby="inputGroupFileAddon01">
+                                                            </div>
                                                         </div>
                                                     </div>
 
@@ -195,18 +219,24 @@
                                                         <div class="row">
                                                             <div class="col-xs-12 col-sm-12 col-md-4">
                                                                 <label for="oldPasswordInput" class="form-label">Contraseña anterior</label>
-                                                                <input name="old_password" type="password"
-                                                                    class="form-control @error('old_password') is-invalid @enderror"
-                                                                    id="oldPasswordInput" placeholder="Contraseña anterior">
+                                                                <div class="input-group">
+                                                                    <input name="old_password" type="password"
+                                                                        class="form-control @error('old_password') is-invalid @enderror"
+                                                                        id="oldPasswordInput" placeholder="Contraseña anterior">
+                                                                    <button type="button" class="btn btn-outline-secondary toggle-password" data-target="#oldPasswordInput" tabindex="-1"><i class="fe fe-eye"></i></button>
+                                                                </div>
                                                                 @error('old_password')
                                                                     <span class="text-danger">{{ $message }}</span>
                                                                 @enderror
                                                             </div>
                                                             <div class="col-xs-12 col-sm-12 col-md-4">
                                                                 <label for="newPasswordInput" class="form-label">Nueva contraseña</label>
-                                                                <input name="new_password" type="password"
-                                                                    class="form-control @error('new_password') is-invalid @enderror"
-                                                                    id="newPasswordInput" placeholder="Nueva contraseña">
+                                                                <div class="input-group">
+                                                                    <input name="new_password" type="password"
+                                                                        class="form-control @error('new_password') is-invalid @enderror"
+                                                                        id="newPasswordInput" placeholder="Nueva contraseña">
+                                                                    <button type="button" class="btn btn-outline-secondary toggle-password" data-target="#newPasswordInput" tabindex="-1"><i class="fe fe-eye"></i></button>
+                                                                </div>
                                                                 @error('new_password')
                                                                     <span class="text-danger">{{ $message }}</span>
                                                                 @enderror
@@ -214,9 +244,12 @@
                                                             <div class="col-xs-12 col-sm-12 col-md-4">
                                                                 <label for="confirmNewPasswordInput"
                                                                     class="form-label">Confirmar nueva contraseña</label>
-                                                                <input name="new_password_confirmation" type="password"
-                                                                    class="form-control" id="confirmNewPasswordInput"
-                                                                    placeholder="Confirmar nueva contraseña">
+                                                                <div class="input-group">
+                                                                    <input name="new_password_confirmation" type="password"
+                                                                        class="form-control" id="confirmNewPasswordInput"
+                                                                        placeholder="Confirmar nueva contraseña">
+                                                                    <button type="button" class="btn btn-outline-secondary toggle-password" data-target="#confirmNewPasswordInput" tabindex="-1"><i class="fe fe-eye"></i></button>
+                                                                </div>
                                                             </div>
                                                         </div>
 
@@ -314,17 +347,15 @@
                                         </div> --}}
                                             <form method="POST" id="rgisterform"
                                                 action="{{ route('userAsociado.create') }}" enctype="multipart/form-data"
-                                                class="form-horizontal validate-form" data-select2-id="11">
-                                                <div class="mb-4 main-content-label">Account</div>
+                                                class="validate-form" data-select2-id="11">
+                                                <div class="mb-4 main-content-label">Registrar usuario asociado</div>
                                                 @csrf
-                                                <div class="form-group ">
-                                                    <div class="row row-sm">
-                                                        <div class="col-md-3">
-                                                            <label for="userName" class="form-label">Full Name</label>
-                                                        </div>
-                                                        <div class="col-md-9">
+                                                <div class="row">
+                                                    <div class="col-md-6">
+                                                        <div class="form-group">
+                                                            <label for="firstName" class="form-label">Nombre completo</label>
                                                             <input id="firstName" type="text"
-                                                                class="form-control input100{{ $errors->has('name') ? ' is-invalid' : '' }}"
+                                                                class="form-control{{ $errors->has('name') ? ' is-invalid' : '' }}"
                                                                 name="name" tabindex="1"
                                                                 placeholder="Nombre Completo" value="{{ old('name') }}"
                                                                 autofocus required>
@@ -333,107 +364,82 @@
                                                             </div>
                                                         </div>
                                                     </div>
-                                                </div>
-                                                <div class="form-group ">
-                                                    <div class="row row-sm">
-                                                        <div class="col-md-3">
-                                                            <label for="userName" class="form-label">Email</label>
-                                                        </div>
-                                                        <div class="col-md-9">
+                                                    <div class="col-md-6">
+                                                        <div class="form-group">
+                                                            <label for="email" class="form-label">Email</label>
                                                             <input id="email" type="email"
-                                                                class="form-control input100{{ $errors->has('email') ? ' is-invalid' : '' }}"
-                                                                placeholder="Enter Email address" name="email"
-                                                                tabindex="1" value="{{ old('email') }}" required
-                                                                autofocus>
+                                                                class="form-control{{ $errors->has('email') ? ' is-invalid' : '' }}"
+                                                                placeholder="Correo electrónico" name="email"
+                                                                tabindex="1" value="{{ old('email') }}" required>
                                                             <div class="invalid-feedback">
                                                                 {{ $errors->first('email') }}
                                                             </div>
                                                         </div>
                                                     </div>
-                                                </div>
-                                                <div class="form-group ">
-                                                    <div class="row row-sm">
-                                                        <div class="col-md-3">
-                                                            <label for="userName" class="form-label">Phone</label>
-                                                        </div>
-                                                        <div class="col-md-9">
+                                                    <div class="col-md-6">
+                                                        <div class="form-group">
+                                                            <label for="telefono" class="form-label">Teléfono</label>
                                                             <input id="telefono" type="number"
-                                                                class="form-control input100{{ $errors->has('telefono') ? ' is-invalid' : '' }}"
-                                                                name="telefono" tabindex="1" placeholder="Telefono"
-                                                                value="{{ old('telefono') }}" autofocus required>
+                                                                class="form-control{{ $errors->has('telefono') ? ' is-invalid' : '' }}"
+                                                                name="telefono" tabindex="1" placeholder="Teléfono"
+                                                                value="{{ old('telefono') }}" required>
                                                             <div class="invalid-feedback">
                                                                 {{ $errors->first('telefono') }}
                                                             </div>
                                                         </div>
                                                     </div>
-                                                </div>
-                                                <div class="form-group ">
-                                                    <div class="row row-sm">
-                                                        <div class="col-md-3">
-                                                            <label for="userName" class="form-label">Tipo
-                                                                documento</label>
-                                                        </div>
-                                                        <div class="col-md-9">
-                                                            <div class="wrap-input100 validate-input">
-                                                                <select class="form-control" name="document_type"
-                                                                    aria-label=".form-select-sm example" required>
-                                                                    <option selected value="">Seleccione tipo
-                                                                        Documento
-                                                                    </option>
-                                                                    <option value="NIT">NIT</option>
-                                                                    <option value="CC">Cedula de
-                                                                        Ciudadania</option>
-                                                                </select>
-                                                                <div class="invalid-feedback">
-                                                                    {{ $errors->first('document_type') }}
-                                                                </div>
+                                                    <div class="col-md-6">
+                                                        <div class="form-group">
+                                                            <label for="document_type" class="form-label">Tipo documento</label>
+                                                            <select id="document_type" class="form-control{{ $errors->has('document_type') ? ' is-invalid' : '' }}" name="document_type"
+                                                                aria-label=".form-select-sm example" required>
+                                                                <option selected value="">Seleccione tipo
+                                                                    Documento
+                                                                </option>
+                                                                <option value="NIT">NIT</option>
+                                                                <option value="CC">Cedula de
+                                                                    Ciudadania</option>
+                                                            </select>
+                                                            <div class="invalid-feedback">
+                                                                {{ $errors->first('document_type') }}
                                                             </div>
                                                         </div>
                                                     </div>
-                                                </div>
-                                                <div class="form-group ">
-                                                    <div class="row row-sm">
-                                                        <div class="col-md-3">
-                                                            <label for="userName"
-                                                                class="form-label">Identification</label>
-                                                        </div>
-                                                        <div class="col-md-9">
+                                                    <div class="col-md-6">
+                                                        <div class="form-group">
+                                                            <label for="identification"
+                                                                class="form-label">Identificación</label>
                                                             <input id="identification" type="number"
-                                                                class="form-control input100{{ $errors->has('identification') ? ' is-invalid' : '' }}"
+                                                                class="form-control{{ $errors->has('identification') ? ' is-invalid' : '' }}"
                                                                 name="identification" tabindex="1"
                                                                 placeholder="Numero Identificacion"
-                                                                value="{{ old('identification') }}" autofocus required>
+                                                                value="{{ old('identification') }}" required>
                                                             <div class="invalid-feedback">
                                                                 {{ $errors->first('identification') }}
                                                             </div>
                                                         </div>
                                                     </div>
-                                                </div>
-                                                <div class="form-group ">
-                                                    <div class="row row-sm">
-                                                        <div class="col-md-3">
-                                                            <label for="userName" class="form-label">Password</label>
-                                                        </div>
-                                                        <div class="col-md-9">
-                                                            <input id="password" type="password"
-                                                                class="form-control input100{{ $errors->has('password') ? ' is-invalid' : '' }}"
-                                                                placeholder="Contraseña" name="password" tabindex="2"
-                                                                required>
+                                                    <div class="col-md-6">
+                                                        <div class="form-group">
+                                                            <label for="password" class="form-label">Contraseña</label>
+                                                            <div class="input-group">
+                                                                <input id="password" type="password"
+                                                                    class="form-control{{ $errors->has('password') ? ' is-invalid' : '' }}"
+                                                                    placeholder="Contraseña" name="password" tabindex="2"
+                                                                    required>
+                                                                <button type="button" class="btn btn-outline-secondary toggle-password" data-target="#password" tabindex="-1"><i class="fe fe-eye"></i></button>
+                                                            </div>
                                                             <div class="invalid-feedback">
                                                                 {{ $errors->first('password') }}
                                                             </div>
                                                         </div>
                                                     </div>
                                                 </div>
-                                                <div class="form-group">
-                                                    <div class="row row-sm">
-                                                        <div class="col-md-3">
-                                                            <button type="submit"
-                                                                class="btn btn-primary btn-lg btn-block" tabindex="4">
-                                                                Register
-                                                            </button>
-                                                        </div>
-                                                    </div>
+                                                <div class="form-group mb-0">
+                                                    <button type="submit"
+                                                        class="btn btn-primary" tabindex="4">
+                                                        Registrar
+                                                    </button>
                                                 </div>
                                             </form>
                                         </div>
@@ -549,6 +555,31 @@
 
         let urlupdatePhoto = "{{ route('photo-profile.updatePhoto') }}"
         updatePhoto(urlupdatePhoto);
+
+        // Vista previa de la nueva foto de perfil antes de subirla
+        $('#photo-profile-input').on('change', function() {
+            var file = this.files[0];
+            if (file) {
+                var reader = new FileReader();
+                reader.onload = function(e) {
+                    $('#photo-profile-preview').attr('src', e.target.result);
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+
+        // Mostrar/ocultar contraseña
+        $('.toggle-password').on('click', function() {
+            var target = $($(this).data('target'));
+            var icon = $(this).find('i');
+            if (target.attr('type') === 'password') {
+                target.attr('type', 'text');
+                icon.removeClass('fe-eye').addClass('fe-eye-off');
+            } else {
+                target.attr('type', 'password');
+                icon.removeClass('fe-eye-off').addClass('fe-eye');
+            }
+        });
     </script>
 
     @if (session('message'))
