@@ -1,5 +1,141 @@
 @extends('layouts.app')
 
+@section('styles')
+    <style>
+        .users-filter-card .affiliate-select-field .select2-container {
+            display: block;
+            height: 38px;
+            width: 100% !important;
+            border: 1px solid #e9edf4;
+            border-radius: 5px;
+            background: #fff;
+        }
+
+        .users-filter-card .affiliate-select-field .select2-container .select2-choice {
+            height: 36px;
+            padding: 0 36px 0 12px;
+            border: 0;
+            border-radius: 5px;
+            background: transparent;
+            background-image: none;
+            box-shadow: none;
+            line-height: 36px;
+        }
+
+        .users-filter-card .affiliate-select-field .select2-container .select2-choice .select2-arrow {
+            width: 34px;
+            border-left: 0;
+            background: transparent;
+            background-image: none;
+        }
+
+        .users-filter-card .affiliate-select-field .select2-container .select2-choice .select2-arrow b {
+            border-color: #76839a transparent transparent transparent;
+        }
+
+        .users-filter-card .affiliate-select-field .select2-container--default .select2-selection--single {
+            height: 36px;
+            border: 0;
+            border-radius: 5px;
+            background: transparent;
+            box-shadow: none;
+        }
+
+        .users-filter-card .affiliate-select-field .select2-container--default .select2-selection--single .select2-selection__rendered {
+            padding-left: 12px;
+            padding-right: 36px;
+            line-height: 36px;
+            color: #76839a;
+        }
+
+        .users-filter-card .affiliate-select-field .select2-container--default .select2-selection--single .select2-selection__arrow {
+            height: 36px;
+            width: 34px;
+        }
+
+        .users-dashboard-card {
+            border: 1px solid #eef1f6;
+            border-radius: 6px;
+            box-shadow: none;
+        }
+
+        .users-dashboard-card .card-body {
+            min-height: 112px;
+        }
+
+        .users-dashboard-label {
+            color: #76839a;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .users-dashboard-value {
+            color: #1f2937;
+            font-size: 28px;
+            font-weight: 700;
+            line-height: 1.1;
+        }
+
+        .users-dashboard-icon {
+            align-items: center;
+            border-radius: 6px;
+            display: inline-flex;
+            height: 38px;
+            justify-content: center;
+            width: 38px;
+        }
+
+        .user-result-card {
+            border: 1px solid #eef1f6;
+            border-radius: 6px;
+            box-shadow: none;
+            height: 100%;
+        }
+
+        .user-result-card .avatar {
+            flex: 0 0 auto;
+        }
+
+        .user-result-meta {
+            display: grid;
+            gap: 10px;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+
+        .user-result-meta-label {
+            color: #76839a;
+            display: block;
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .user-result-meta-value {
+            color: #344050;
+            display: block;
+            font-size: 13px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .user-result-actions {
+            border-top: 1px solid #eef1f6;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            padding-top: 14px;
+        }
+
+        @media (max-width: 575.98px) {
+            .user-result-meta {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+@endsection
+
 @section('content')
 
     <body class="ltr app sidebar-mini light-mode">
@@ -19,78 +155,203 @@
                         </div>
                     </div>
 
-                    <div class="card-body">
-                        <div class="row">
-                            <div class="col-lg-3">
+                    <div class="card-body px-0">
+                        <div class="d-flex flex-wrap align-items-center justify-content-between gap-2">
+                            <div>
+                                <h5 class="mb-1">Gestión de usuarios</h5>
+                                <p class="text-muted mb-0">Consulta, filtra y administra afiliados por estado, rol o documento.</p>
+                            </div>
+                            <div class="d-flex flex-wrap gap-2">
                                 <a href="{{ url('portal/usuarios/create') }}" class="btn btn-primary">
-                                    Crear Usuario
+                                    <i class="fa fa-plus me-1"></i> Crear Usuario
                                 </a>
+                                <button type="button" id="btnGetUserEliminated" class="btn btn-outline-primary">
+                                    <i class="fa fa-history me-1"></i> Usuarios Eliminados
+                                </button>
                             </div>
                         </div>
                     </div>
 
-                    <div class="card">
-                        <div class="row">
-                            <button class="btn btn-info dropdown-toggle" type="button" data-bs-toggle="collapse"
+                    <div class="mb-3">
+                        <button class="btn btn-info" type="button" data-bs-toggle="collapse"
                                 data-bs-target="#collapseExample" aria-expanded="false" aria-controls="collapseExample">
-                                Filtros
-                            </button>
+                            <i class="fa fa-filter me-1"></i> Filtros
+                        </button>
+                    </div>
+
+                    <div class="row row-sm">
+                        <div class="col-sm-6 col-xl-3">
+                            <div class="card users-dashboard-card">
+                                <div class="card-body">
+                                    <div class="d-flex justify-content-between align-items-start">
+                                        <div>
+                                            <div class="users-dashboard-label">Usuarios activos</div>
+                                            <div class="users-dashboard-value mt-2">{{ $dashboard['active_total'] ?? 0 }}</div>
+                                        </div>
+                                        <span class="users-dashboard-icon bg-primary-transparent text-primary">
+                                            <i class="fa fa-users"></i>
+                                        </span>
+                                    </div>
+                                    <div class="text-muted tx-12 mt-3">
+                                        {{ $dashboard['confirmed_total'] ?? 0 }} confirmados · {{ $dashboard['new_total'] ?? 0 }} nuevos
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-sm-6 col-xl-3">
+                            <div class="card users-dashboard-card">
+                                <div class="card-body">
+                                    <div class="d-flex justify-content-between align-items-start">
+                                        <div>
+                                            <div class="users-dashboard-label">Usuarios eliminados</div>
+                                            <div class="users-dashboard-value mt-2">{{ $dashboard['deleted_total'] ?? 0 }}</div>
+                                        </div>
+                                        <span class="users-dashboard-icon bg-danger-transparent text-danger">
+                                            <i class="fa fa-trash"></i>
+                                        </span>
+                                    </div>
+                                    <div class="text-muted tx-12 mt-3">Disponibles para restaurar desde el modal</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-sm-6 col-xl-3">
+                            <div class="card users-dashboard-card">
+                                <div class="card-body">
+                                    <div class="d-flex justify-content-between align-items-start">
+                                        <div>
+                                            <div class="users-dashboard-label">Docs repetidos</div>
+                                            <div class="users-dashboard-value mt-2">{{ $dashboard['duplicate_documents_total'] ?? 0 }}</div>
+                                        </div>
+                                        <span class="users-dashboard-icon bg-warning-transparent text-warning">
+                                            <i class="fa fa-id-card"></i>
+                                        </span>
+                                    </div>
+                                    <div class="text-muted tx-12 mt-3">Incluye usuarios activos y eliminados</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-sm-6 col-xl-3">
+                            <div class="card users-dashboard-card">
+                                <div class="card-body">
+                                    <div class="d-flex justify-content-between align-items-start">
+                                        <div>
+                                            <div class="users-dashboard-label">Sin rol asignado</div>
+                                            <div class="users-dashboard-value mt-2">{{ $dashboard['without_role_total'] ?? 0 }}</div>
+                                        </div>
+                                        <span class="users-dashboard-icon bg-info-transparent text-info">
+                                            <i class="fa fa-user-times"></i>
+                                        </span>
+                                    </div>
+                                    <div class="text-muted tx-12 mt-3">{{ $dashboard['rejected_total'] ?? 0 }} rechazados · {{ $dashboard['associated_total'] ?? 0 }} asociados</div>
+                                </div>
+                            </div>
                         </div>
                     </div>
+
+                    @if (!empty($dashboard['duplicate_documents']) && $dashboard['duplicate_documents']->count() > 0)
+                        <div class="card custom-card">
+                            <div class="card-header border-bottom">
+                                <h5 class="card-title mb-0">Análisis de documentos repetidos</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="table-responsive">
+                                    <table class="table table-bordered text-nowrap mb-0">
+                                        <thead>
+                                            <tr>
+                                                <th>Número de documento</th>
+                                                <th>Registros encontrados</th>
+                                                <th>Observación</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            @foreach ($dashboard['duplicate_documents'] as $duplicateDocument)
+                                                <tr>
+                                                    <td>{{ $duplicateDocument->number_id }}</td>
+                                                    <td>{{ $duplicateDocument->total }}</td>
+                                                    <td>
+                                                        <span class="badge bg-warning-transparent text-warning">
+                                                            Revisar activo/eliminado antes de crear o restaurar
+                                                        </span>
+                                                    </td>
+                                                </tr>
+                                            @endforeach
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    @endif
                 </div>
 
 
                 <div class="collapse" id="collapseExample">
                     <div class="row row-sm">
                         <div class="col-lg-12">
-                            <div class="card custom-card">
+                            <div class="card custom-card users-filter-card">
                                 <div class="card-body">
                                     <form class="form-horizontal" id="filter" action="{{ route('user.filtros') }}"
                                         method="post" novalidate>
                                         @csrf
-                                        <div class="row">
+                                        <div class="row g-3">
                                             <div class="col-lg-3">
                                                 <label for="estado" class="form-label">Filtrar por estado</label>
                                                 <select type="text" name="estado" id="estado" class="form-control"
-                                                    tabindex="3" value="{{ old('estado') }}" autofocus>
-                                                    <option selected>Todos</option>
-                                                    <option value="NUEVO">NUEVO</option>
-                                                    <option value="CONFIRMADO">CONFIRMADO</option>
-                                                    <option value="RECHAZADO">RECHAZADO</option>
-                                                    <option value="ASOCIADO">ASOCIADO</option>
+                                                    tabindex="3" autofocus>
+                                                    @foreach (['Todos', 'NUEVO', 'CONFIRMADO', 'RECHAZADO', 'ASOCIADO'] as $estado)
+                                                        <option value="{{ $estado }}" @selected(($filters['estado'] ?? 'Todos') === $estado)>{{ $estado }}</option>
+                                                    @endforeach
                                                 </select>
                                                 <div class="invalid-feedback">
                                                     {{ $errors->first('estado') }}
                                                 </div>
                                             </div>
+                                            <div class="col-lg-3">
+                                                <label for="role" class="form-label">Filtrar por rol</label>
+                                                <select name="role" id="role" class="form-control" tabindex="3">
+                                                    <option value="Todos" @selected(($filters['role'] ?? 'Todos') === 'Todos')>Todos</option>
+                                                    @foreach (($roles ?? []) as $roleName)
+                                                        <option value="{{ $roleName }}" @selected(($filters['role'] ?? 'Todos') === $roleName)>
+                                                            {{ $roleName == 'ClienteHijo' ? 'Cliente Hijo' : $roleName }}
+                                                        </option>
+                                                    @endforeach
+                                                </select>
+                                            </div>
                                             <div class="col-md-3">
                                                 <label for="name" class="form-label">Nombre Afiliado</label>
-                                                <div class="form-group">
-                                                    <input type="hidden" class="form-control" id="customerCode" name="name" />
+                                                <div class="form-group affiliate-select-field">
+                                                    <input type="hidden" id="customerCode" name="name" value="{{ $filters['name'] ?? '' }}" />
                                                 </div>
                                             </div>
                                             <div class="col-lg-3">
                                                 <label for="number_id" class="form-label">Numero de Identificacion</label>
                                                 <input type="text" name="number_id" id="number_id" class="form-control"
-                                                    tabindex="3" value="{{ old('number_id') }}" autofocus>
+                                                    tabindex="3" value="{{ $filters['number_id'] ?? old('number_id') }}" autofocus>
                                             </div>
                                             <div class="col-md-3">
                                                 <label for="limit" class="form-label">Limite de Usuarios</label>
-                                                {{-- <input type="text" name="limit" id="limit" class="form-control" tabindex="3"
-                                                    value="{{ old('limit') }}" autofocus> --}}
                                                 <select name="limit" id="limit-input" class="form-control" tabindex="3"
-                                                    value="{{ old('limit') }}" autofocus>
-                                                    <option value="50" selected>50</option>
-                                                    <option value="100">100</option>
-                                                    <option value="200">200</option>
-                                                    <option value="">Todos</option>
+                                                    autofocus>
+                                                    @foreach ([50, 100, 200] as $limit)
+                                                        <option value="{{ $limit }}" @selected((string) ($filters['limit'] ?? 50) === (string) $limit)>{{ $limit }}</option>
+                                                    @endforeach
+                                                    <option value="" @selected(($filters['limit'] ?? 50) === '')>Todos</option>
                                                 </select>
                                             </div>
                                         </div>
-                                        <br>
-                                        <button type="submit" id="btnFilter" class="btn btn-primary">Filtrar</button>
-                                        <div class="text-end">
-                                            <button type="button" id="btnGetUserEliminated" class="btn btn-primary">Lista de Usuarios Eliminados</button>
+                                        <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mt-4">
+                                            <div class="text-muted" id="usersResultCount">
+                                                @if (method_exists($usuarios, 'total'))
+                                                    {{ $usuarios->total() }} usuarios encontrados
+                                                @else
+                                                    {{ $usuarios->count() }} usuarios encontrados
+                                                @endif
+                                            </div>
+                                            <div class="d-flex gap-2">
+                                                <a href="{{ route('usuario.index') }}" class="btn btn-outline-secondary">Limpiar</a>
+                                                <button type="submit" id="btnFilter" class="btn btn-primary">
+                                                    <i class="fa fa-search me-1"></i> Filtrar
+                                                </button>
+                                            </div>
                                         </div>
                                     </form>
                                 </div>
@@ -100,182 +361,156 @@
                 </div>
 
                 <!-- ROW OPEN -->
-                <div class="row row-sm">
-                    <div class="col-lg-12">
-                        <div class="card custom-card">
-                            <div class="card-body">
-                                <div class="table-responsive">
-                                    <table id="file-datatable"
-                                        class="table table-bordered text-nowrap key-buttons border-bottom w-100 tt">
-                                        <thead>
-                                            <tr>
-                                                <th class="wd-2">Foto</th>
-                                                <th>Nombre</th>
-                                                <th>Telefono</th>
-                                                <th># Doc</th>
-                                                <th>PDF Doc</th>
-                                                <th>Rol</th>
-                                                <th>Estado</th>
-                                                <th>Acciones</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            @foreach ($usuarios as $usuario)
-                                                @php
-                                                    $photoPath = $usuario->photo ?? '';
-                                                    if (!empty($photoPath)) {
-                                                        if (\Illuminate\Support\Str::startsWith($photoPath, ['http://', 'https://'])) {
-                                                            $photoUrl = $photoPath;
-                                                        } elseif (\Illuminate\Support\Str::startsWith($photoPath, ['storage/', 'public/'])) {
-                                                            $photoUrl = asset($photoPath);
-                                                        } else {
-                                                            $photoUrl = asset('storage/' . $photoPath);
-                                                        }
-                                                    } else {
-                                                        $photoUrl = '';
-                                                    }
+                <div class="row row-sm" id="usersTableSection">
+                    @forelse ($usuarios as $usuario)
+                        @php
+                            $photoPath = $usuario->photo ?? '';
+                            if (!empty($photoPath)) {
+                                if (\Illuminate\Support\Str::startsWith($photoPath, ['http://', 'https://'])) {
+                                    $photoUrl = $photoPath;
+                                } elseif (\Illuminate\Support\Str::startsWith($photoPath, ['storage/', 'public/'])) {
+                                    $photoUrl = asset($photoPath);
+                                } else {
+                                    $photoUrl = asset('storage/' . $photoPath);
+                                }
+                            } else {
+                                $photoUrl = '';
+                            }
 
-                                                    $docPath = $usuario->photo_id ?? '';
-                                                    if (!empty($docPath)) {
-                                                        if (\Illuminate\Support\Str::startsWith($docPath, ['http://', 'https://'])) {
-                                                            $docUrl = $docPath;
-                                                        } elseif (\Illuminate\Support\Str::startsWith($docPath, ['storage/', 'public/'])) {
-                                                            $docUrl = asset($docPath);
-                                                        } else {
-                                                            $docUrl = asset('storage/' . $docPath);
-                                                        }
-                                                    } else {
-                                                        $docUrl = '';
-                                                    }
-                                                @endphp
-                                                <tr>
-                                                    <td class="text-center">
-                                                        @if ($usuario->photo == '')
-                                                            <div class="avatar avatar-md bg-{{ $usuario->otherColors(rand(2, 9)) }} text-white rounded-circle">
-                                                                {{ substr($usuario->email, 0, 2) }}
-                                                            </div>
-                                                        @else
-                                                        <div class="avatar avatar-md text-white rounded-circle" style="overflow: hidden;">
-                                                            <img src="{{ $photoUrl }}" alt="" style="width: 100%; height: auto;"/>
-                                                        </div>
-                                                        @endif
-                                                    </td>
-                                                    <td>
-                                                        <p class="tx-14 font-weight-semibold text-dark mb-1">
-                                                            {{ $usuario->name }}
-                                                        </p>
-                                                        <p class="tx-13 text-muted mb-0"><a
-                                                                href="mailto:{{ $usuario->email }}">{{ $usuario->email }}
-                                                            </a></p>
-                                                    </td>
-                                                    <td>
-                                                        <span class="text-muted tx-13">{{ $usuario->phone }}</span>
-                                                    </td>
-                                                    <td>
-                                                        <span class="text-muted tx-13">{{ $usuario->number_id }}</span>
-                                                    </td>
-                                                    <td class="text-center">
-                                                        @if (!empty($usuario->photo_id))
-                                                            <span>
-                                                                <a href="" data-bs-toggle="modal"
-                                                                    data-bs-target="#exampleModalPdf" class="aPdf" data-url="{{ $docUrl }}">
-                                                                    <i></i>
-                                                                    <svg style="width:24px;height:24px" viewBox="0 0 24 24">
-                                                                        <path fill="currentColor"
-                                                                            d="M13,9H18.5L13,3.5V9M6,2H14L20,8V20A2,2 0 0,1 18,22H6C4.89,22 4,21.1 4,20V4C4,2.89 4.89,2 6,2M15,18V16H6V18H15M18,14V12H6V14H18Z" />
-                                                                    </svg>
-                                                                </a>
-                                                            </span>
-                                                        @else
-                                                            <svg style="width:30px;height:30px" viewBox="0 0 24 24">
-                                                                <path fill="currentColor"
-                                                                    d="M2,3H22C23.05,3 24,3.95 24,5V19C24,20.05 23.05,21 22,21H2C0.95,21 0,20.05 0,19V5C0,3.95 0.95,3 2,3M14,6V7H22V6H14M14,8V9H21.5L22,9V8H14M14,10V11H21V10H14M8,13.91C6,13.91 2,15 2,17V18H14V17C14,15 10,13.91 8,13.91M8,6A3,3 0 0,0 5,9A3,3 0 0,0 8,12A3,3 0 0,0 11,9A3,3 0 0,0 8,6Z" />
-                                                            </svg>
-                                                        @endif
-                                                    </td>
-                                                    <td>
-                                                        @if (!empty($usuario->rol->rol_nombre['name']))
-                                                            {{ $usuario->rol->rol_nombre['name'] == 'ClienteHijo' ? 'Cliente Hijo' : $usuario->rol->rol_nombre['name'] }}
-                                                        @endif
+                            $docPath = $usuario->photo_id ?? '';
+                            if (!empty($docPath)) {
+                                if (\Illuminate\Support\Str::startsWith($docPath, ['http://', 'https://'])) {
+                                    $docUrl = $docPath;
+                                } elseif (\Illuminate\Support\Str::startsWith($docPath, ['storage/', 'public/'])) {
+                                    $docUrl = asset($docPath);
+                                } else {
+                                    $docUrl = asset('storage/' . $docPath);
+                                }
+                            } else {
+                                $docUrl = '';
+                            }
 
-                                                    </td>
-                                                    <td>
-                                                        <span
-                                                            class="badge font-weight-semibold bg-{{ $usuario->badges($usuario->status) }}-transparent text-{{ $usuario->badges($usuario->status) }} tx-11">
-                                                            {{ $usuario->status }}
-                                                        </span>
-                                                    </td>
-                                                    <td>
+                            $roleName = $usuario->rol->rol_nombre['name'] ?? 'Sin rol';
+                            $roleLabel = $roleName == 'ClienteHijo' ? 'Cliente Hijo' : $roleName;
+                        @endphp
+                        <div class="col-md-6 col-xl-4 mb-4">
+                            <div class="card user-result-card">
+                                <div class="card-body">
+                                    <div class="d-flex align-items-start gap-3 mb-3">
+                                        @if ($usuario->photo == '')
+                                            <div class="avatar avatar-md bg-{{ $usuario->otherColors(($usuario->id % 8) + 2) }} text-white rounded-circle">
+                                                {{ strtoupper(substr($usuario->email, 0, 2)) }}
+                                            </div>
+                                        @else
+                                            <div class="avatar avatar-md text-white rounded-circle" style="overflow: hidden;">
+                                                <img src="{{ $photoUrl }}" alt="{{ $usuario->name }}" style="width: 100%; height: 100%; object-fit: cover;"/>
+                                            </div>
+                                        @endif
+                                        <div class="flex-grow-1 min-w-0">
+                                            <div class="d-flex justify-content-between align-items-start gap-2">
+                                                <div class="min-w-0">
+                                                    <h6 class="mb-1 text-truncate">{{ $usuario->name }}</h6>
+                                                    <a class="tx-13 text-muted d-block text-truncate" href="mailto:{{ $usuario->email }}">{{ $usuario->email }}</a>
+                                                </div>
+                                                <span class="badge font-weight-semibold bg-{{ $usuario->badges($usuario->status) }}-transparent text-{{ $usuario->badges($usuario->status) }} tx-11">
+                                                    {{ $usuario->status }}
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </div>
 
+                                    <div class="user-result-meta mb-3">
+                                        <div>
+                                            <span class="user-result-meta-label">Teléfono</span>
+                                            <span class="user-result-meta-value">{{ $usuario->phone ?: 'Sin teléfono' }}</span>
+                                        </div>
+                                        <div>
+                                            <span class="user-result-meta-label">Documento</span>
+                                            <span class="user-result-meta-value">{{ $usuario->number_id ?: 'Sin documento' }}</span>
+                                        </div>
+                                        <div>
+                                            <span class="user-result-meta-label">Rol</span>
+                                            <span class="user-result-meta-value">{{ $roleLabel }}</span>
+                                        </div>
+                                        <div>
+                                            <span class="user-result-meta-label">PDF Doc</span>
+                                            @if (!empty($usuario->photo_id))
+                                                <a href="#" data-bs-toggle="modal" data-bs-target="#exampleModalPdf" class="user-result-meta-value aPdf" data-url="{{ $docUrl }}">
+                                                    <i class="fa fa-file-pdf-o me-1"></i> Ver documento
+                                                </a>
+                                            @else
+                                                <span class="user-result-meta-value text-muted">No cargado</span>
+                                            @endif
+                                        </div>
+                                    </div>
 
-                                                        <a href="{{ route('consultar.afiliado', [$usuario->id]) }}"
-                                                            class="btn btn-icon btn-info-light me-2" id="consultAfiliado"
-                                                            data-bs-toggle="tooltip"
-                                                            data-bs-original-title="Validar Informacion">
-                                                            <i class="fa fa-user"></i>
-                                                        </a>
+                                    <div class="user-result-actions">
+                                        <a href="{{ route('consultar.afiliado', [$usuario->id]) }}"
+                                            class="btn btn-icon btn-info-light consultAfiliado"
+                                            data-bs-toggle="tooltip"
+                                            data-bs-original-title="Validar Informacion">
+                                            <i class="fa fa-user"></i>
+                                        </a>
 
-                                                        @switch($usuario->status)
-                                                            @case('ASOCIADO')
-                                                                <a data-bs-whatever="@mdo" id="{{ $usuario->id }}"
-                                                                    class="proveedor btn btn-icon btn-success-light me-2"
-                                                                    data-bs-toggle="tooltip"
-                                                                    data-bs-original-title="Consultar Padre">
-                                                                    <i class="fa fa-users"></i>
-                                                                </a>
-                                                            @break
+                                        @switch($usuario->status)
+                                            @case('ASOCIADO')
+                                                <a href="#" data-bs-whatever="@mdo" id="{{ $usuario->id }}"
+                                                    class="proveedor btn btn-icon btn-success-light"
+                                                    data-bs-toggle="tooltip"
+                                                    data-bs-original-title="Consultar Padre">
+                                                    <i class="fa fa-users"></i>
+                                                </a>
+                                            @break
 
-                                                            @case('NUEVO')
-                                                                <a href="{{ route('usuario.estado', ['usuario' => $usuario, 'estado' => 'aprobado']) }}"
-                                                                    class="btn btn-icon btn-primary-light me-2"
-                                                                    data-bs-toggle="tooltip" data-bs-original-title="Aceptar">
-                                                                    <i class="fa fa-check"></i>
-                                                                </a>
-                                                                <a href="{{ route('usuario.estado', ['usuario' => $usuario, 'estado' => 'rechazado']) }}"
-                                                                    class="btn btn-icon btn-warning-light me-2"
-                                                                    data-bs-toggle="tooltip" data-bs-original-title="Rechazar">
-                                                                    <i class="fa fa-user-times"></i>
-                                                                </a>
-                                                            @break
+                                            @case('NUEVO')
+                                                <a href="{{ route('usuario.estado', ['usuario' => $usuario, 'estado' => 'aprobado']) }}"
+                                                    class="btn btn-icon btn-primary-light"
+                                                    data-bs-toggle="tooltip" data-bs-original-title="Aceptar">
+                                                    <i class="fa fa-check"></i>
+                                                </a>
+                                                <a href="{{ route('usuario.estado', ['usuario' => $usuario, 'estado' => 'rechazado']) }}"
+                                                    class="btn btn-icon btn-warning-light"
+                                                    data-bs-toggle="tooltip" data-bs-original-title="Rechazar">
+                                                    <i class="fa fa-user-times"></i>
+                                                </a>
+                                            @break
 
-                                                            @default
-                                                            @break
-                                                        @endswitch
+                                            @default
+                                            @break
+                                        @endswitch
 
-                                                        <div class="btn-group" role="group">
-                                                            <button type="button" class="btn btn-secondary dropdown-toggle" data-toggle="dropdown" aria-expanded="false" data-bs-toggle="tooltip" data-bs-original-title="Ver Más">
-                                                                <i class="fa fa-share-alt" aria-hidden="true"></i>
-                                                            </button>
-                                                            <div class="dropdown-menu">
-                                                                <a class="dropdown-item">
-                                                                    <a href="{{ route('edit', [$usuario->id]) }}"
-                                                                        class="btn btn-icon btn-warning-light me-2"
-                                                                        data-bs-toggle="tooltip" data-bs-original-title="Editar">
-                                                                        <i class="fa fa-pencil-square"></i>
-                                                                    </a>
-                                                                    <a id="{{ $usuario->id }}"
-                                                                        class="btn btn-icon btn-info-light me-2 btnEnviarContrasena"
-                                                                        data-bs-toggle="tooltip" data-bs-original-title="Generer Contraseña">
-                                                                        {{-- <i class="fa fa-pencil-square"></i> --}}
-                                                                        <i class="fa fa-envelope-square" aria-hidden="true"></i>
-                                                                    </a>
-                                                                    <a href="" id="{{ $usuario->id }}"
-                                                                        class="deletedUser btn btn-icon btn-danger-light me-2"
-                                                                        data-bs-toggle="tooltip" data-bs-original-title="Eliminar">
-                                                                        <i class="fa fa-trash"></i>
-                                                                    </a>
-                                                                </a>
-                                                            </div>
-                                                        </div>
-                                                    </td>
-                                                </tr>
-                                            @endforeach
-                                        </tbody>
-                                    </table>
+                                        <a href="{{ route('edit', [$usuario->id]) }}" class="btn btn-icon btn-warning-light" data-bs-toggle="tooltip" data-bs-original-title="Editar">
+                                            <i class="fa fa-pencil-square"></i>
+                                        </a>
+                                        <a href="#" id="{{ $usuario->id }}" class="btn btn-icon btn-info-light btnEnviarContrasena" data-bs-toggle="tooltip" data-bs-original-title="Generar Contraseña">
+                                            <i class="fa fa-envelope-square" aria-hidden="true"></i>
+                                        </a>
+                                        <a href="#" id="{{ $usuario->id }}" class="btn btn-icon btn-danger-light deletedUser" data-bs-toggle="tooltip" data-bs-original-title="Eliminar">
+                                            <i class="fa fa-trash"></i>
+                                        </a>
+                                    </div>
                                 </div>
                             </div>
                         </div>
-                    </div>
+                    @empty
+                        <div class="col-12">
+                            <div class="card custom-card">
+                                <div class="card-body text-center py-5">
+                                    <i class="fa fa-search text-muted mb-3" style="font-size: 32px;"></i>
+                                    <h5 class="mb-1">No se encontraron usuarios</h5>
+                                    <p class="text-muted mb-0">Ajusta los filtros e intenta nuevamente.</p>
+                                </div>
+                            </div>
+                        </div>
+                    @endforelse
+
+                    @if (method_exists($usuarios, 'links'))
+                        <div class="col-12">
+                            <div class="mt-2">
+                                {{ $usuarios->links() }}
+                            </div>
+                        </div>
+                    @endif
                 </div>
                 <!-- ROW CLOSED -->
                 <!-- Modal imagen -->
@@ -384,6 +619,7 @@
 
         let url = "{{ route('setting.affiliate') }}"
         listAffiliate(url);
+        filterUsersTable();
 
         let urlPassword = "{{ route('enviar-contrasena') }}"
         enviarContrasena(urlPassword);

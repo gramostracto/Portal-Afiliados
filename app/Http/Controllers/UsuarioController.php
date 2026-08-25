@@ -39,8 +39,24 @@ class UsuarioController extends Controller
      */
     public function index(Request $request)
     {
-        $usuarios = User::where('deleted_at', NULL)->orderBy('updated_at', 'desc')->paginate(50);
-        return view('usuarios.index', ['usuarios' => $usuarios]);
+        $usuarios = User::with('rol.rol_nombre')
+            ->whereNull('deleted_at')
+            ->orderBy('updated_at', 'desc')
+            ->paginate(50);
+        $roles = Role::orderBy('name')->pluck('name', 'name')->all();
+
+        return view('usuarios.index', [
+            'usuarios' => $usuarios,
+            'roles' => $roles,
+            'dashboard' => $this->getUsersDashboard(),
+            'filters' => [
+                'estado' => 'Todos',
+                'role' => 'Todos',
+                'name' => null,
+                'number_id' => null,
+                'limit' => 50,
+            ],
+        ]);
     }
 
     /**
@@ -122,27 +138,84 @@ class UsuarioController extends Controller
 
     public function filtros(Request $request)
     {
-        $usuarios = User::orderBy('updated_at', 'desc');
+        $validated = $request->validate([
+            'estado' => 'nullable|string',
+            'role' => 'nullable|string',
+            'name' => 'nullable|integer',
+            'number_id' => 'nullable|string|max:30',
+            'limit' => 'nullable|in:50,100,200',
+        ]);
+
+        $usuarios = User::with('rol.rol_nombre')
+            ->whereNull('deleted_at')
+            ->orderBy('updated_at', 'desc');
 
         // Filtro por estado
-        if ($request->estado != 'Todos') {
+        if ($request->filled('estado') && $request->estado != 'Todos') {
             $usuarios->where('status', $request->estado);
         }
 
+        if ($request->filled('role') && $request->role != 'Todos') {
+            $usuarios->whereHas('roles', function ($query) use ($request) {
+                $query->where('name', $request->role);
+            });
+        }
+
         // Filtro por número de identificación
-        if ($request->number_id != '') {
-            $usuarios->where('number_id', $request->number_id);
+        if ($request->filled('number_id')) {
+            $usuarios->where('number_id', 'like', '%' . $request->number_id . '%');
         }
 
         // Filtro por nombre (si el número de identificación no está presente)
-        if ($request->name != '' && $request->number_id == null) {
+        if ($request->filled('name') && !$request->filled('number_id')) {
             $usuarios->where('id', $request->name);
         }
 
         // Paginación o obtener todos los resultados
-        $users = $request->limit != "" ? $usuarios->paginate(intval($request->limit)) : $usuarios->get();
+        $users = $request->filled('limit') ? $usuarios->paginate(intval($request->limit)) : $usuarios->get();
+        $roles = Role::orderBy('name')->pluck('name', 'name')->all();
 
-        return view('usuarios.index', ['usuarios' => $users]);
+        return view('usuarios.index', [
+            'usuarios' => $users,
+            'roles' => $roles,
+            'dashboard' => $this->getUsersDashboard(),
+            'filters' => array_merge([
+                'estado' => 'Todos',
+                'role' => 'Todos',
+                'name' => null,
+                'number_id' => null,
+                'limit' => '',
+            ], $validated),
+        ]);
+    }
+
+    private function getUsersDashboard(): array
+    {
+        $statusTotals = User::select('status', DB::raw('count(*) as total'))
+            ->whereNull('deleted_at')
+            ->groupBy('status')
+            ->pluck('total', 'status');
+
+        $duplicateDocuments = User::withTrashed()
+            ->select('number_id', DB::raw('count(*) as total'))
+            ->whereNotNull('number_id')
+            ->where('number_id', '!=', '')
+            ->groupBy('number_id')
+            ->having('total', '>', 1)
+            ->orderByDesc('total')
+            ->get();
+
+        return [
+            'active_total' => User::whereNull('deleted_at')->count(),
+            'deleted_total' => User::onlyTrashed()->count(),
+            'new_total' => $statusTotals->get('NUEVO', 0),
+            'confirmed_total' => $statusTotals->get('CONFIRMADO', 0),
+            'rejected_total' => $statusTotals->get('RECHAZADO', 0),
+            'associated_total' => $statusTotals->get('ASOCIADO', 0),
+            'without_role_total' => User::whereNull('deleted_at')->doesntHave('roles')->count(),
+            'duplicate_documents_total' => $duplicateDocuments->count(),
+            'duplicate_documents' => $duplicateDocuments->take(5),
+        ];
     }
 
     public function edit($id)
@@ -227,7 +300,12 @@ class UsuarioController extends Controller
 
     public function destroy(Request $request)
     {
-        User::find($request->userId)->delete();
+        $user = User::find($request->userId);
+        if (!$user) {
+            return response()->json(['success' => false, 'message' => 'Usuario no encontrado'], 404);
+        }
+
+        $user->delete();
         $userShilder = Relationship::where([['user_id', $request->userId], ['deleted_status', '!=', 'INACTIVE']])->select('user_assigne_id')->get();
 
         if (count($userShilder) > 0) {
@@ -237,10 +315,13 @@ class UsuarioController extends Controller
                 // return response()->json(['success' => true, 'data' => $id]);
                 relationship::where('user_assigne_id', $id)->update(['deleted_status' => 'INACTIVE']);
                 // relationship::find($id)->delete();
-                User::find($id)->delete();
+                $associatedUser = User::find($id);
+                if ($associatedUser) {
+                    $associatedUser->delete();
+                }
             }
         }
-        // return response()->json(['success' => true]);
+        return response()->json(['success' => true]);
     }
 
     public function cambiarEstado($idUsuario)

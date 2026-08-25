@@ -16,20 +16,17 @@ let listAffiliate = function (url) {
             url: url,
             dataType: 'json',
             delay: 300,
-            data: function (term, page) {
+            data: function (params) {
+                const term = params && params.term ? params.term : params;
                 return {
                     q:  encodeURIComponent(term)
                 };
             },
+            processResults: function (data) {
+                return formatAffiliateResults(data);
+            },
             results: function (data) {
-                return {
-                    results: $.map(data, function (item) {
-                        return {
-                            text: item.name,
-                            id: item.id
-                        }
-                    })
-                };
+                return formatAffiliateResults(data);
             },
             error: function (xhr, textStatus, errorThrown) {
                 console.log('Error en la consulta AJAX: ' + errorThrown);
@@ -38,6 +35,78 @@ let listAffiliate = function (url) {
             },
             cache: false
         }
+    });
+};
+
+const formatAffiliateResults = function (data) {
+    return {
+        results: $.map(data, function (item) {
+            return {
+                text: item.name,
+                id: item.id
+            }
+        })
+    };
+};
+
+const refreshUsersResults = function (url, data, button) {
+    const originalButtonHtml = button ? button.html() : null;
+
+    if (button) {
+        button.prop('disabled', true).html('<i class="fa fa-spinner fa-spin me-1"></i> Filtrando');
+    }
+
+    $.ajax({
+        url: url,
+        type: 'POST',
+        data: data,
+        success: function(response) {
+            const parsedHtml = $('<div>').append($.parseHTML(response));
+            const nextTableSection = parsedHtml.find('#usersTableSection');
+            const nextResultCount = parsedHtml.find('#usersResultCount');
+
+            if (nextTableSection.length) {
+                $('#usersTableSection').replaceWith(nextTableSection);
+            }
+
+            if (nextResultCount.length) {
+                $('#usersResultCount').replaceWith(nextResultCount);
+            }
+        },
+        error: function(xhr) {
+            Swal.fire({
+                icon: 'error',
+                title: 'No se pudo filtrar',
+                text: xhr.responseJSON && xhr.responseJSON.message ? xhr.responseJSON.message : 'Intenta nuevamente.',
+            });
+        },
+        complete: function() {
+            if (button) {
+                button.prop('disabled', false).html(originalButtonHtml);
+            }
+        }
+    });
+};
+
+let filterUsersTable = function () {
+    $(document).on('submit', '#filter', function(e) {
+        e.preventDefault();
+
+        const form = $(this);
+        const button = $('#btnFilter');
+        refreshUsersResults(form.attr('action'), form.serialize(), button);
+    });
+
+    $(document).on('click', '#usersTableSection .pagination a', function(e) {
+        e.preventDefault();
+
+        const form = $('#filter');
+        const href = $(this).attr('href');
+        const params = new URLSearchParams(href.split('?')[1] || '');
+        const page = params.get('page') || 1;
+        const data = form.serialize() + '&page=' + encodeURIComponent(page);
+
+        refreshUsersResults(form.attr('action'), data);
     });
 };
 
@@ -97,8 +166,8 @@ let getUserEliminated = function (urlGetUserElimin) {
             success: function(data) {
                 // Construir la tabla
                 console.log(data);
-                var tableHtml = '<table id="file-datatable" class="table table-bordered text-nowrap key-buttons border-bottom w-100 tt">';
-                tableHtml += '<thead><tr><th>ID</th><th>Email</th><th>Nombre</th><th>Fecha eliminación</th></tr></thead>';
+                var tableHtml = '<table id="deleted-users-table" class="table table-bordered text-nowrap key-buttons border-bottom w-100 tt">';
+                tableHtml += '<thead><tr><th>ID</th><th>Email</th><th>Nombre</th><th>Fecha eliminación</th><th>Acciones</th></tr></thead>';
                 tableHtml += '<tbody>';
                 data.forEach(function(user) {
                     tableHtml += '<tr>';
@@ -144,7 +213,7 @@ let reactivate = function (urlReactivate) {
                     Swal.fire({
                         icon: 'success',
                         title: 'Restaurado',
-                        text: 'Usuario restaurado correctament',
+                        text: 'Usuario restaurado correctamente',
                     })
 
                     window.location.reload();
@@ -175,7 +244,7 @@ let deletedUser = function (urlDeletedUser) {
 
         swalWithBootstrapButtons.fire({
             title: '¿Estás seguro que deseas eliminar este usuario?',
-            text: "¡No podrás revertir esto, ten en cuenta que los usuarios asociados a este igulmente serán eliminados!",
+            text: "¡No podrás revertir esto, ten en cuenta que los usuarios asociados a este igualmente serán eliminados!",
             icon: 'warning',
             showCancelButton: true,
             confirmButtonText: 'Si, Eliminarlo',
@@ -193,15 +262,27 @@ let deletedUser = function (urlDeletedUser) {
                         'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
                     },
                     success: function(response) {
-                        console.log(response.data);
                         if (response.success == true) {
                             swalWithBootstrapButtons.fire(
                                 '¡Eliminado!',
                                 'El usuario ha sido eliminado',
                                 'success'
                             )
+                        } else {
+                            swalWithBootstrapButtons.fire(
+                                'No se pudo eliminar',
+                                response.message || 'Intenta nuevamente.',
+                                'error'
+                            )
                         }
                         window.location.reload();
+                    },
+                    error: function(xhr) {
+                        swalWithBootstrapButtons.fire(
+                            'No se pudo eliminar',
+                            xhr.responseJSON && xhr.responseJSON.message ? xhr.responseJSON.message : 'Intenta nuevamente.',
+                            'error'
+                        )
                     }
                 });
 
@@ -244,10 +325,10 @@ let proveedor = function (urlProveedor, urlProveedorLocal) {
                         plantillaBody = `
                         <form>
                             <div class="float-left">
-                                <h6 class="mb-0 p-2"> <b>Nombre Completo:</b> ${data.name}</h6>
-                                <h6 class="mb-0 p-2"> <b>Numero Identificacion:</b> ${data.number_id}</h6>
-                                <h6 class="mb-0 p-2"> <b>Correo:</b> ${data.email}</h6>
-                                <h6 class="mb-0 p-2"> <b>Telefono:</b> ${data.phone}</h6>
+                                <h6 class="mb-0 p-2"> <b>Nombre Completo:</b> ${escapeHtml(data.name)}</h6>
+                                <h6 class="mb-0 p-2"> <b>Numero Identificacion:</b> ${escapeHtml(data.number_id)}</h6>
+                                <h6 class="mb-0 p-2"> <b>Correo:</b> ${escapeHtml(data.email)}</h6>
+                                <h6 class="mb-0 p-2"> <b>Telefono:</b> ${escapeHtml(data.phone)}</h6>
                             </div>
                         </form>
 
@@ -340,7 +421,7 @@ let Loader = function() {
 }
 // Fin
 
-$(document).on('click', "#consultAfiliado", function(e) {
+$(document).on('click', ".consultAfiliado", function(e) {
     Loader();
 });
 
@@ -362,22 +443,18 @@ for (const alink of alinks) {
     })
 }
 
-let alinksPdf = document.getElementsByClassName('aPdf')
-
-for (const alinkPdf of alinksPdf) {
-    alinkPdf.addEventListener('click', function(e) {
-        e.preventDefault()
-        let url = this.dataset && this.dataset.url ? this.dataset.url : null;
-        const pdfEmbed = document.getElementById('pdfdoc');
-        if (!url) {
-            Swal.fire({
-                icon: 'warning',
-                title: 'Archivo no disponible',
-                text: 'No se encontró la ruta del PDF.',
-            });
-            return;
-        }
-        pdfEmbed.setAttribute('src', '');
-        pdfEmbed.setAttribute('src', url);
-    })
-}
+$(document).on('click', '.aPdf', function(e) {
+    e.preventDefault()
+    let url = this.dataset && this.dataset.url ? this.dataset.url : null;
+    const pdfEmbed = document.getElementById('pdfdoc');
+    if (!url) {
+        Swal.fire({
+            icon: 'warning',
+            title: 'Archivo no disponible',
+            text: 'No se encontró la ruta del PDF.',
+        });
+        return;
+    }
+    pdfEmbed.setAttribute('src', '');
+    pdfEmbed.setAttribute('src', url);
+})
