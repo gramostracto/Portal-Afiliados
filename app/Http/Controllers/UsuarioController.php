@@ -39,13 +39,8 @@ class UsuarioController extends Controller
      */
     public function index(Request $request)
     {
-        // event(new MessageSentPrivate('Nuevo Usuario', 'Se ha resgistrado un nuevo usuario'));
-        // $usuarios = self::filtros();
-
         $usuarios = User::where('deleted_at', NULL)->orderBy('updated_at', 'desc')->paginate(50);
-
         return view('usuarios.index', ['usuarios' => $usuarios]);
-        //? al usar esta paginacion, recordar poner en el el index.blade.php este codigo  {!! $usuarios->links() !!}
     }
 
     /**
@@ -55,24 +50,10 @@ class UsuarioController extends Controller
      */
     public function create()
     {
-        //aqui trabajamos con name de las tablas de users
         $roles = Role::pluck('name', 'name')->all();
+
         return view('usuarios.crear', compact('roles'));
     }
-
-    // protected function validator(Request $data)
-    // {
-
-    //     return Validator::make($data, [
-    //         'name' => ['required', 'string', 'max:255'],
-    //         'email' => ['required', 'string', 'email', 'max:255', 'unique:users', 'indisposable'],
-    //         'number_id' => ['required','numeric', 'unique:users'],
-    //         'phone' => ['required','numeric'],
-    //         'document_type' => ['required'],
-    //         'password' => ['required', 'string', 'min:8', 'confirmed'],
-    //     ]);
-
-    // }
 
     public function createUserAsociado(Request $request)
     {
@@ -129,7 +110,8 @@ class UsuarioController extends Controller
 
         $input = $request->all();
 
-        $input['status'] = 'NUEVO';
+        $input['status'] = $request->input('roles')[0] == 'ClienteHijo' ? 'ASOCIADO' : 'CONFIRMADO';
+        $input['email_verified_at'] = now();
         $input['password'] = Hash::make($input['password']);
 
         $user = User::create($input);
@@ -161,7 +143,6 @@ class UsuarioController extends Controller
         $users = $request->limit != "" ? $usuarios->paginate(intval($request->limit)) : $usuarios->get();
 
         return view('usuarios.index', ['usuarios' => $users]);
-
     }
 
     public function edit($id)
@@ -298,24 +279,24 @@ class UsuarioController extends Controller
         try {
             # Validation
             $request->validate([
-               'old_password' => 'required',
-               'new_password' => 'required|confirmed',
-           ]);
+                'old_password' => 'required',
+                'new_password' => 'required|confirmed',
+            ]);
 
-           #Match The Old Password
-           if(!Hash::check( $request->old_password, auth()->user()->password)){
-               return response()->json(['error' => 'La contraseña anterior no coincide!']);
-           }
+            #Match The Old Password
+            if (!Hash::check($request->old_password, auth()->user()->password)) {
+                return response()->json(['error' => 'La contraseña anterior no coincide!']);
+            }
 
 
-           #Update the new Password
-           User::whereId(auth()->user()->id)->update([
-               'password' => Hash::make($request->new_password)
-           ]);
+            #Update the new Password
+            User::whereId(auth()->user()->id)->update([
+                'password' => Hash::make($request->new_password)
+            ]);
 
-           return response()->json(['status', 'Contraseña cambiada con éxito!']);
+            return response()->json(['status', 'Contraseña cambiada con éxito!']);
         } catch (\Throwable $th) {
-             Log::error(__METHOD__ . '. General error: ' . $th->getMessage());
+            Log::error(__METHOD__ . '. General error: ' . $th->getMessage());
         }
     }
 
@@ -333,7 +314,4 @@ class UsuarioController extends Controller
         $user->restore();
         return response()->json(['success' => true]);
     }
-
-
-
 }
