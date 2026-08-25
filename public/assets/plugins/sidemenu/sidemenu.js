@@ -293,6 +293,9 @@ $(window).resize(
         let menuWidth = document.querySelector('.horizontal-main');
         let menuItems = document.querySelector('.side-menu');
         let mainSidemenuWidth = document.querySelector('.main-sidemenu');
+        if (!menuItems || !mainSidemenuWidth) {
+            return;
+        }
         let menuContainerWidth = menuWidth?.offsetWidth - mainSidemenuWidth?.offsetWidth;
         let marginLeftValue = Math.ceil(window.getComputedStyle(menuItems).marginLeft.split('px')[0]);
         let marginRightValue = Math.ceil(window.getComputedStyle(menuItems).marginRight.split('px')[0]);
@@ -389,6 +392,9 @@ function checkHoriMenu() {
     let menuWidth = document.querySelector('.horizontal-main')
     let menuItems = document.querySelector('.side-menu')
     let mainSidemenuWidth = document.querySelector('.main-sidemenu')
+    if (!menuItems || !mainSidemenuWidth) {
+        return;
+    }
     let menuContainerWidth = menuWidth?.offsetWidth - mainSidemenuWidth?.offsetWidth
     let marginLeftValue = Math.ceil(window.getComputedStyle(menuItems).marginLeft.split('px')[0]);
     let marginRightValue = Math.ceil(window.getComputedStyle(menuItems).marginRight.split('px')[0]);
