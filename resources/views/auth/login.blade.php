@@ -28,6 +28,18 @@
                     </div>
                 @endif
 
+                @if (session('error'))
+                    <div class="auth-alert">
+                        {{ session('error') }}
+                    </div>
+                @endif
+
+                @if (session('mantenimiento'))
+                    <div class="auth-alert">
+                        {{ session('mantenimiento') }}
+                    </div>
+                @endif
+
                 <form method="POST" action="{{ route('login') }}">
                     @csrf
                     <div class="auth-field">

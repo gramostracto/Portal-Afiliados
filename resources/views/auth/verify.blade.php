@@ -1,28 +1,51 @@
 @extends('layouts.auth_app')
-
+@section('title')
+    Verify Email
+@endsection
 @section('content')
-    <div class="container">
-        <div class="row justify-content-center">
-            <div class="col-md-8">
-                <div class="card">
-                    <div class="card-header">{{ __('Verifique su dirección de correo electrónico') }}</div>
 
-                    <div class="card-body">
-                        @if (session('resent'))
-                            <div class="alert alert-success" role="alert">
-                                {{ __('Se ha enviado un nuevo enlace de verificación a su dirección de correo electrónico.') }}
-                            </div>
-                        @endif
+<body id="kt_body" class="auth-page">
+    @include('auth.partials.auth-style')
 
-                        {{ __('Antes de continuar, verifique su electrónico para obtener un enlace de verificación.') }}
-                        {{ __('Si no recibiste el correo electrónico') }},
-                        <form class="d-inline" method="POST" action="{{ route('verification.resend') }}">
-                            @csrf
-                            <button type="submit" class="btn btn-link p-0 m-0 align-baseline">haga clic aquí para solicitar otro</button>.
-                        </form>
+    <main class="auth-shell">
+        <section class="auth-brand" aria-label="Portal de afiliados Tractocar">
+            <img class="auth-brand-logo" src="{{ asset('assets/images/logos-tractocar/TCL_POS_CMYK-01.png') }}" alt="Tractocar">
+            <h1>Portal de afiliados</h1>
+            <p>Consulta, gestiona y actualiza tu informacion de afiliacion de forma segura.</p>
+        </section>
+
+        <section class="auth-card-wrap" aria-label="Verificar correo">
+            <div class="auth-card">
+                <div class="auth-card-header">
+                    <div class="auth-kicker">Acceso seguro</div>
+                    <h2>Verifica tu correo</h2>
+                    <p class="auth-card-subtitle">Antes de continuar, confirma tu direccion de correo electronico.</p>
+                </div>
+
+                @if (session('resent'))
+                    <div class="auth-status">
+                        Se ha enviado un nuevo enlace de verificacion a tu direccion de correo electronico.
                     </div>
+                @endif
+
+                <p class="auth-card-subtitle" style="margin-bottom: 24px;">
+                    Revisa tu bandeja de entrada y da clic en el enlace de verificacion que te enviamos.
+                </p>
+
+                <form method="POST" action="{{ route('verification.resend') }}">
+                    @csrf
+                    <div class="d-grid">
+                        <button type="submit" class="btn btn-primary auth-submit" tabindex="4">
+                            Reenviar enlace de verificacion
+                        </button>
+                    </div>
+                </form>
+
+                <div class="auth-support text-center">
+                    <a href="{{ route('login') }}" class="auth-link">Volver a iniciar sesion</a>
                 </div>
             </div>
-        </div>
-    </div>
+        </section>
+    </main>
+</body>
 @endsection
