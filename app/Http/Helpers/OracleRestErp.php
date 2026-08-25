@@ -24,13 +24,17 @@ class OracleRestErp
 
     public static function procurementGetSuppliers($params = null)
     {
+
         $path = '/fscmRestApi/resources/11.13.18.05/suppliers';
         $erp  = self::getDataAccess();
+
         $url  = $erp['server'] . $path;
+
         $response = Http::withBasicAuth($erp['username'], $erp['password'])
             ->withHeaders([
                 'REST-Framework-Version' => '2'
             ])->get($url, $params);
+
         return $response;
     }
 
@@ -47,7 +51,8 @@ class OracleRestErp
         return $response;
     }
 
-    public static function getinvoiceHolds($params = null){
+    public static function getinvoiceHolds($params = null)
+    {
         $path = '/fscmRestApi/resources/11.13.18.05/invoiceHolds';
         $erp = self::getDataAccess();
         $url  = $erp['server'] . $path;

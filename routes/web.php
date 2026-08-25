@@ -56,11 +56,14 @@ Route::prefix('consultaOTM')->controller(ConsultarAfiliadoController::class)->mi
 });
 
 Route::controller(ConsultarAfiliadoController::class)->middleware('auth')->group(function () {
-    Route::post('facturas/total', 'TotalAmount')->name('total');
+
+    Route::post('totalsByStatus', 'totalsByStatus')->name('invoices.totalsByStatus');
+
     Route::post('invoiceLines', 'getInvoiceLines')->name('invoice.lines');
-    Route::post('facturas/pagadas', 'customers')->name('falturas.pagadas');
-    Route::post('facturas/transporte', 'getShipmentOtm')->name('falturas.transporte');
-    Route::post('facturas/transporte/detalle', 'getShipmentDetalle')->name('falturas.transporte.detalle');
+
+    Route::post('searchInvoices', 'searchInvoices')->name('invoices.search');
+    Route::post('facturas/transporte', 'getShipmentOtm')->name('facturas.transporte');
+    Route::post('facturas/transporte/detalle', 'getShipmentDetalle')->name('facturas.transporte.detalle');
     Route::post('suppliernumber', 'getSupplierNumber')->name('supplier.number');
     Route::get('SelectSuppliernumber', 'SelectSupplierNumber')->name('selectSupplier.number');
     Route::post('consultaOTM/afiliado', 'consultaOTM')->middleware('permission:/usuario.index')->name('afiliado.consulta');
@@ -95,6 +98,7 @@ Route::get('/refresh-captcha', [FormController::class, 'refreshCaptcha'])->name(
 
 Route::prefix('error')->controller(ErrorController::class)->middleware('auth')->group(function () {
     Route::get('/404', 'error404')->name('error404');
+    Route::get('/proveedor-no-encontrado', 'proveedorNoEncontrado')->name('error.proveedor-no-encontrado');
 });
 
 Route::post('/enviar-contrasena', [PasswordController::class, 'enviarContrasenaPorCorreo'])->middleware(['auth', 'permission:/usuario.index'])->name('enviar-contrasena');
