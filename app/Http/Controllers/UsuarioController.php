@@ -20,6 +20,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Session;
+use Illuminate\Validation\Rule;
 
 
 
@@ -268,14 +269,24 @@ class UsuarioController extends Controller
     public function update(Request $request, $id)
     {
         $this->validate($request, [
-            'name'     => 'required',
-            'email'    => 'required|email|unique:users,email,' . $id,
-            'phone'    => 'required|numeric',
-            'password' => 'same:confirm-password',
-            'roles'    => 'required'
+            'name'          => 'required',
+            'email'         => 'required|email|unique:users,email,' . $id,
+            'document_type' => 'required',
+            'number_id'     => ['required', 'numeric', Rule::unique('users', 'number_id')->ignore($id)],
+            'phone'         => 'required|numeric',
+            'password'      => 'same:confirm-password',
+            'roles'         => 'required'
         ]);
 
-        $input = $request->all();
+        $input = $request->only([
+            'name',
+            'email',
+            'document_type',
+            'number_id',
+            'phone',
+            'status',
+            'password',
+        ]);
         if (!empty($input['password'])) {
             $input['password'] = Hash::make($input['password']);
         } else {
