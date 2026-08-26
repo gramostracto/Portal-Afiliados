@@ -164,7 +164,7 @@ class ConsultarAfiliadoController extends Controller
             'limit'    => $limit,
             'offset'   => $offset,
             'totalResults' => 'true',
-            'fields'   => 'InvoiceId,InvoiceNumber,InvoiceDate,PaidStatus,InvoiceAmount,CanceledFlag,AmountPaid;invoiceInstallments:UnpaidAmount,GrossAmount,DueDate',
+            'fields'   => 'Supplier,SupplierNumber,InvoiceId,InvoiceNumber,InvoiceDate,PaidStatus,InvoiceAmount,CanceledFlag,AmountPaid;invoiceInstallments:UnpaidAmount,GrossAmount,DueDate',
             'onlyData' => 'true',
             'orderBy'  => 'InvoiceDate:desc'
         ];
@@ -182,6 +182,8 @@ class ConsultarAfiliadoController extends Controller
                     return response()->json(['success' => false, 'data' => 'No se encontro el proveedor'], 404);
                 }
                 $conditions[] = "(SupplierNumber = '{$ownSupplierNumber}')";
+            } elseif (!empty($request->SupplierNumber)) {
+                $conditions[] = "(SupplierNumber = '{$this->odataEscape($request->SupplierNumber)}')";
             }
 
             $core = in_array($request->core, ['=', '>', '<', '>=', '<=', '!='], true) ? $request->core : '=';

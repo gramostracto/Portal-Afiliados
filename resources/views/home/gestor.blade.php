@@ -27,12 +27,16 @@
                                     </button>
                                 </div>
                             </div>
-                            <div class="card-header border-bottom" id="collapseExampleFilterGestor">
+                            <div class="card-header border-bottom invoice-filter-panel" id="collapseExampleFilterGestor">
                                 <div class="row g-2">
                                     <h3 class="card-title">Fitros</h3>
                                     <div class="form-horizontal">
-                                        <div class="row mb-2">
-                                            <div class="col-md-3">
+                                        <div class="gestor-filter-grid">
+                                            <div class="gestor-filter-provider">
+                                                <label for="supplierNumberFilter" class="form-label">Proveedor</label>
+                                                <input type="hidden" id="supplierNumberFilter" name="SupplierNumber" />
+                                            </div>
+                                            <div class="gestor-filter-limit">
                                                 <label for="InvoiceLimit" class="form-label"># Factoras que desea
                                                     visualizar</label>
                                                 <select type="text" name="InvoiceLimit" id="InvoiceLimit"
@@ -48,7 +52,7 @@
                                                     <option value="500">500</option>
                                                 </select>
                                             </div>
-                                            <div class="col-md">
+                                            <div class="gestor-filter-control">
                                                 <label for="tipoFactura" class="form-label">Tipo de
                                                     factura</label>
                                                 <select type="text" name="tipoFactura" id="tipoFactura"
@@ -60,7 +64,7 @@
                                                     <option value="Nota de crédito">Nota Crédito</option>
                                                 </select>
                                             </div>
-                                            <div class="col-md">
+                                            <div class="gestor-filter-control">
                                                 <label for="ValidationStatus" class="form-label">Estado
                                                     Validación</label>
                                                 <select type="text" name="ValidationStatus" id="ValidationStatus"
@@ -73,7 +77,7 @@
                                                     </option>
                                                 </select>
                                             </div>
-                                            <div class="col-md">
+                                            <div class="gestor-filter-control">
                                                 <label for="PaidStatus" class="form-label">Estado Pago</label>
                                                 <select type="text" name="PaidStatus" id="PaidStatus"
                                                     class="form-select" tabindex="3"
@@ -84,7 +88,7 @@
                                                     <option value="Pagada parcialmente">parcialmente</option>
                                                 </select>
                                             </div>
-                                            <div class="col-md">
+                                            <div class="gestor-filter-control">
                                                 <label for="CanceledFlag" class="form-label">Canceladas</label>
                                                 <select type="text" name="CanceledFlag" id="CanceledFlag"
                                                     class="form-select" tabindex="3"
@@ -93,7 +97,7 @@
                                                     <option value="true">Si</option>
                                                 </select>
                                             </div>
-                                            <div class="col-md-3">
+                                            <div class="gestor-filter-dates">
                                                 <label for="title" class="form-label">Fecha Inicio y
                                                     Fecha Fin</label>
                                                 <div class="input-group">
@@ -108,8 +112,10 @@
                                                         value="{{ old('endDate') }}" autofocus>
                                                 </div>
                                             </div>
+                                            <div class="gestor-filter-action">
+                                                <button type="submit" class="btn btn-primary" id="btnPrFiltr">Filtrar</button>
+                                            </div>
                                         </div>
-                                        <button type="submit" class="btn btn-primary" id="btnPrFiltr">Filtrar</button>
                                     </div>
                                 </div>
                             </div>
@@ -252,6 +258,7 @@
             routes: {
                 searchInvoices: "{{ route('invoices.search') }}",
                 invoiceLines: "{{ route('invoice.lines') }}",
+                selectSupplierNumber: "{{ route('selectSupplier.number') }}",
             },
             lang: {
                 supplier: @json(__('locale.Supplier')),

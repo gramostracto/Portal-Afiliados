@@ -582,6 +582,80 @@
         font-weight: 600;
     }
 
+    .gestor-filter-grid {
+        display: grid;
+        grid-template-columns: minmax(260px, 2fr) minmax(180px, 1.2fr) repeat(4, minmax(130px, 1fr)) minmax(300px, 1.6fr) auto;
+        gap: 14px 16px;
+        align-items: end;
+    }
+
+    .gestor-filter-grid .form-control,
+    .gestor-filter-grid .form-select,
+    .gestor-filter-grid .select2-container {
+        width: 100% !important;
+        min-width: 0;
+    }
+
+    .gestor-filter-grid .select2-choice,
+    .gestor-filter-grid .select2-container--default .select2-selection--single {
+        min-height: 38px;
+    }
+
+    .gestor-filter-grid .input-group {
+        flex-wrap: nowrap;
+    }
+
+    .gestor-filter-grid .input-group .form-control {
+        min-width: 140px;
+    }
+
+    .gestor-filter-action {
+        display: flex;
+        align-items: end;
+    }
+
+    .gestor-filter-action .btn {
+        min-height: 38px;
+        white-space: nowrap;
+    }
+
+    @media (max-width: 1399.98px) {
+        .gestor-filter-grid {
+            grid-template-columns: repeat(12, minmax(0, 1fr));
+        }
+
+        .gestor-filter-provider {
+            grid-column: span 4;
+        }
+
+        .gestor-filter-limit,
+        .gestor-filter-dates {
+            grid-column: span 4;
+        }
+
+        .gestor-filter-control {
+            grid-column: span 2;
+        }
+
+        .gestor-filter-action {
+            grid-column: span 2;
+        }
+    }
+
+    @media (max-width: 991.98px) {
+        .gestor-filter-provider,
+        .gestor-filter-limit,
+        .gestor-filter-control,
+        .gestor-filter-dates,
+        .gestor-filter-action {
+            grid-column: span 12;
+        }
+
+        .gestor-filter-action .btn {
+            width: 100%;
+        }
+    }
+
     .invoice-main-tab.active .invoice-main-tab-count {
         background: rgba(255, 255, 255, .28);
         color: #fff;

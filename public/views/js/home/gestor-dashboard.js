@@ -155,8 +155,38 @@ let Load = function(cant) {
     })
 }
 
-// Trae todas las facturas (todos los proveedores) via searchInvoices; el backend
-// omite el filtro de SupplierNumber cuando el usuario autenticado es gestor.
+let initSupplierFilter = function() {
+    $("#supplierNumberFilter").select2({
+        placeholder: "Buscar proveedor",
+        minimumInputLength: 3,
+        allowClear: true,
+        ajax: {
+            url: GestorConfig.routes.selectSupplierNumber,
+            dataType: "json",
+            delay: 300,
+            data: function(term) {
+                const query = term && term.term ? term.term : term;
+                return {
+                    q: String(query || "").toUpperCase()
+                };
+            },
+            results: function(data) {
+                return {
+                    results: $.map(data, function(item) {
+                        return {
+                            text: item.Supplier,
+                            id: item.SupplierNumber
+                        };
+                    })
+                };
+            },
+            cache: false
+        }
+    });
+};
+
+// Trae facturas via searchInvoices; si el consultor selecciona proveedor,
+// se envia SupplierNumber para acotar la consulta.
 let LoadData = function(PaidStatus, CanceledFlag, TableName, InvoiceType, ValidationStatus, startDate,
     endDate, InvoiceLimit) {
     tblColectionData = getScrollTable(TableName, invoiceTableColumns);
@@ -414,6 +444,7 @@ $(function() {
         var ValidationStatus = document.getElementById("ValidationStatus").value;
         var PaidStatus = document.getElementById("PaidStatus").value;
         var CanceledFlag = document.getElementById("CanceledFlag").value;
+        GestorConfig.supplierNumber = document.getElementById("supplierNumberFilter").value || null;
         var startDate = document.getElementById("startDate").value;
         var endDate = document.getElementById("endDate").value;
         if (tblColectionData) tblColectionData.setData([]);
@@ -453,6 +484,7 @@ $(function() {
     });
 
     // Carga inicial de la tabla
+    initSupplierFilter();
     Loader();
     LoadData("", "false", "#TablaFacturasGestor", "", "", "", "", "500");
 });
