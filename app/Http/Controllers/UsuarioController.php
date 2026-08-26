@@ -142,7 +142,7 @@ class UsuarioController extends Controller
         $validated = $request->validate([
             'estado' => 'nullable|string',
             'role' => 'nullable|string',
-            'name' => 'nullable|integer',
+            'name' => 'nullable|string|max:255',
             'number_id' => 'nullable|string|max:30',
             'limit' => 'nullable|in:50,100,200',
         ]);
@@ -167,9 +167,9 @@ class UsuarioController extends Controller
             $usuarios->where('number_id', 'like', '%' . $request->number_id . '%');
         }
 
-        // Filtro por nombre (si el número de identificación no está presente)
-        if ($request->filled('name') && !$request->filled('number_id')) {
-            $usuarios->where('id', $request->name);
+        // Filtro local por nombre de proveedor
+        if ($request->filled('name')) {
+            $usuarios->where('name', 'like', '%' . $request->name . '%');
         }
 
         // Paginación o obtener todos los resultados

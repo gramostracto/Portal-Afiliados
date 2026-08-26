@@ -7,48 +7,6 @@ const escapeHtml = function (value) {
         .replace(/'/g, '&#39;');
 };
 
-// cunsulta de usuarios select2
-let listAffiliate = function (url) {
-    $('#customerCode').select2({
-        placeholder: "Buscar un afiliado",
-        minimumInputLength: 3,
-        ajax: {
-            url: url,
-            dataType: 'json',
-            delay: 300,
-            data: function (params) {
-                const term = params && params.term ? params.term : params;
-                return {
-                    q:  encodeURIComponent(term)
-                };
-            },
-            processResults: function (data) {
-                return formatAffiliateResults(data);
-            },
-            results: function (data) {
-                return formatAffiliateResults(data);
-            },
-            error: function (xhr, textStatus, errorThrown) {
-                console.log('Error en la consulta AJAX: ' + errorThrown);
-                // Mostrar un mensaje de error al usuario, por ejemplo, en un div de error
-                $('#error-message').text('Error en la consulta. Intente nuevamente más tarde.');
-            },
-            cache: false
-        }
-    });
-};
-
-const formatAffiliateResults = function (data) {
-    return {
-        results: $.map(data, function (item) {
-            return {
-                text: item.name,
-                id: item.id
-            }
-        })
-    };
-};
-
 const refreshUsersResults = function (url, data, button) {
     const originalButtonHtml = button ? button.html() : null;
 
@@ -363,7 +321,7 @@ let consultarAfiliadoModal = function () {
 
                 content.html(`
                     <div class="alert alert-warning mb-0">
-                        No se pudo cargar la validación del afiliado.
+                        ${escapeHtml(response.message || 'No se pudo cargar la validación del afiliado.')}
                     </div>
                 `);
             },

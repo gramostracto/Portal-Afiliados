@@ -484,6 +484,13 @@ class ConsultarAfiliadoController extends Controller
         try {
             $userData = User::find($id);
             if (!$userData) {
+                if ($request->ajax()) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Usuario no encontrado.',
+                    ], 404);
+                }
+
                 return redirect()->route('usuario.index')->with('error', 'Usuario no encontrado.');
             }
             $document = ($userData->document_type == "NIT") ? RequestNit::getNit($userData->number_id) : $userData->number_id;
@@ -526,7 +533,10 @@ class ConsultarAfiliadoController extends Controller
                     'phone'        => $result_contacts->phone1 ?? null,
                 ];
             } else {
-                Log::error(__METHOD__ . '. General error: ' . $response->body() . ' - ' . $response->object());
+                Log::error(__METHOD__ . '. OTM response error.', [
+                    'status' => $response->status(),
+                    'body' => $response->body(),
+                ]);
                 $arrayResultOtm =
                     [
                         'locationXid'  => null,
@@ -538,7 +548,7 @@ class ConsultarAfiliadoController extends Controller
             }
 
             $paramsErp = [
-                'q'        => "(TaxpayerId = '{$document}')",
+                'q'        => "(TaxpayerId = '{$this->odataEscape($document)}')",
                 'limit'    => '200',
                 'fields'   => 'TaxpayerId,Supplier,SupplierNumber;addresses:Email,PhoneNumber,Status',
                 'onlyData' => 'true'
@@ -583,6 +593,13 @@ class ConsultarAfiliadoController extends Controller
             return view('usuarios.consultar', $viewData);
         } catch (\Throwable $th) {
             Log::error(__METHOD__ . '. General error: ' . $th->getMessage());
+            if ($request->ajax()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'No se pudo cargar la validación del afiliado. Revise los logs para más detalle.',
+                ], 500);
+            }
+
             session()->flash('message', "Special message goes here");
             return back();
         }

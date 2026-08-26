@@ -7,7 +7,36 @@
     ];
 
     $normalizeValue = function ($value) {
-        return trim(mb_strtolower((string) $value));
+        $value = trim(mb_strtoupper((string) $value));
+        $value = preg_replace('/\s+/', ' ', $value);
+
+        return $value;
+    };
+
+    $normalizeNameTokens = function ($value) use ($normalizeValue) {
+        $value = $normalizeValue($value);
+        $value = preg_replace('/[^\pL\pN\s]/u', ' ', $value);
+        $value = preg_replace('/\s+/', ' ', trim($value));
+
+        return collect(explode(' ', $value))->filter()->unique()->values();
+    };
+
+    $nameMatches = function ($values) use ($normalizeNameTokens) {
+        $tokenGroups = $values->map($normalizeNameTokens)->filter(function ($tokens) {
+            return $tokens->count() > 0;
+        })->values();
+
+        if ($tokenGroups->count() <= 1) {
+            return false;
+        }
+
+        $smallestGroup = $tokenGroups->sortBy(function ($tokens) {
+            return $tokens->count();
+        })->first();
+
+        return $tokenGroups->every(function ($tokens) use ($smallestGroup) {
+            return $smallestGroup->diff($tokens)->isEmpty();
+        });
     };
 
     $localStatusActive = $arrayResultLocal['estado'] == 'CONFIRMADO';
@@ -49,7 +78,9 @@
                 $values = collect([$row['portal'], $row['otm'], $row['erp']])->filter(function ($value) {
                     return $value !== null && $value !== '';
                 });
-                $matches = $values->count() > 1 && $values->map($normalizeValue)->unique()->count() === 1;
+                $matches = $row['label'] === 'Nombre'
+                    ? $nameMatches($values)
+                    : $values->count() > 1 && $values->map($normalizeValue)->unique()->count() === 1;
             @endphp
             <div class="validation-row">
                 <div class="validation-field">

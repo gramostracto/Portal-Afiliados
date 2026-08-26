@@ -2,57 +2,6 @@
 
 @section('styles')
     <style>
-        .users-filter-card .affiliate-select-field .select2-container {
-            display: block;
-            height: 38px;
-            width: 100% !important;
-            border: 1px solid #e9edf4;
-            border-radius: 5px;
-            background: #fff;
-        }
-
-        .users-filter-card .affiliate-select-field .select2-container .select2-choice {
-            height: 36px;
-            padding: 0 36px 0 12px;
-            border: 0;
-            border-radius: 5px;
-            background: transparent;
-            background-image: none;
-            box-shadow: none;
-            line-height: 36px;
-        }
-
-        .users-filter-card .affiliate-select-field .select2-container .select2-choice .select2-arrow {
-            width: 34px;
-            border-left: 0;
-            background: transparent;
-            background-image: none;
-        }
-
-        .users-filter-card .affiliate-select-field .select2-container .select2-choice .select2-arrow b {
-            border-color: #76839a transparent transparent transparent;
-        }
-
-        .users-filter-card .affiliate-select-field .select2-container--default .select2-selection--single {
-            height: 36px;
-            border: 0;
-            border-radius: 5px;
-            background: transparent;
-            box-shadow: none;
-        }
-
-        .users-filter-card .affiliate-select-field .select2-container--default .select2-selection--single .select2-selection__rendered {
-            padding-left: 12px;
-            padding-right: 36px;
-            line-height: 36px;
-            color: #76839a;
-        }
-
-        .users-filter-card .affiliate-select-field .select2-container--default .select2-selection--single .select2-selection__arrow {
-            height: 36px;
-            width: 34px;
-        }
-
         .users-dashboard-card {
             border: 1px solid #eef1f6;
             border-radius: 6px;
@@ -414,10 +363,10 @@
                                                 </select>
                                             </div>
                                             <div class="col-md-3">
-                                                <label for="name" class="form-label">Nombre Afiliado</label>
-                                                <div class="form-group affiliate-select-field">
-                                                    <input type="hidden" id="customerCode" name="name" value="{{ $filters['name'] ?? '' }}" />
-                                                </div>
+                                                <label for="name" class="form-label">Nombre proveedor</label>
+                                                <input type="text" name="name" id="name" class="form-control"
+                                                    tabindex="3" value="{{ $filters['name'] ?? old('name') }}"
+                                                    placeholder="Buscar por nombre">
                                             </div>
                                             <div class="col-lg-3">
                                                 <label for="number_id" class="form-label">Numero de Identificacion</label>
@@ -755,8 +704,6 @@
             swal.close();
         }
 
-        let url = "{{ route('setting.affiliate') }}"
-        listAffiliate(url);
         filterUsersTable();
         consultarAfiliadoModal();
 
