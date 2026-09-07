@@ -196,7 +196,8 @@ class ConsultarAfiliadoController extends Controller
                 $conditions[] = "(InvoiceDate {$core} '{$this->odataEscape($request->InvoiceDate)}')";
             }
             if (!empty($request->CanceledFlag)) {
-                $conditions[] = "(CanceledFlag = '{$this->odataEscape($request->CanceledFlag)}')";
+                $canceledFlag = filter_var($request->CanceledFlag, FILTER_VALIDATE_BOOLEAN) ? 'true' : 'false';
+                $conditions[] = "(CanceledFlag = {$canceledFlag})";
             }
             if (!empty($request->PaidStatus)) {
                 $conditions[] = "(PaidStatus = '{$this->odataEscape($request->PaidStatus)}')";
