@@ -9,6 +9,7 @@ use App\Http\Helpers\GetClientIp;
 use App\Http\Helpers\sendEmailRequest;
 use App\Http\Helpers\UserTracking;
 use App\Models\Relationship;
+use App\Http\Helpers\RequestNit;
 use App\Models\User;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Http\JsonResponse;
@@ -78,6 +79,16 @@ class UsuarioController extends Controller
             $user_relation = DB::table('relationship')->where('user_id', Auth::user()->id)->count();
             if ($user_relation <= 3) {
 
+                $identification = RequestNit::normalize($request->document_type, $request->identification);
+                if ($identification === null || RequestNit::exists($request->document_type, $request->identification)) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => RequestNit::validationError($request->document_type, $request->identification)
+                            ?? 'Ya existe un usuario con este número de identificación.',
+                    ], 422);
+                }
+                $request->merge(['identification' => $identification]);
+
                 //?Capturamos el id del user registrdo
                 DB::transaction(function () use ($request) {
                     $user = User::create([
@@ -118,7 +129,7 @@ class UsuarioController extends Controller
         $this->validate($request, [
             'name'     => 'required',
             'email' => ['required', 'string', 'email', 'max:255', 'unique:users', 'indisposable'],
-            'number_id' => ['required', 'numeric', 'unique:users',],
+            'number_id' => ['required', RequestNit::rule(fn() => $request->document_type)],
             'phone' => ['required', 'digits_between:7,11'],
             'document_type' => ['required'],
             'password' => 'required|same:confirm-password',
@@ -126,6 +137,7 @@ class UsuarioController extends Controller
         ]);
 
         $input = $request->all();
+        $input['number_id'] = RequestNit::normalize($request->document_type, $request->number_id);
 
         $input['status'] = $request->input('roles')[0] == 'ClienteHijo' ? 'ASOCIADO' : 'CONFIRMADO';
         $input['email_verified_at'] = now();
@@ -272,7 +284,7 @@ class UsuarioController extends Controller
             'name'          => 'required',
             'email'         => 'required|email|unique:users,email,' . $id,
             'document_type' => 'required',
-            'number_id'     => ['required', 'numeric', Rule::unique('users', 'number_id')->ignore($id)],
+            'number_id'     => ['required', RequestNit::rule(fn() => $request->document_type, $id)],
             'phone'         => 'required|numeric',
             'password'      => 'same:confirm-password',
             'roles'         => 'required'
@@ -287,6 +299,7 @@ class UsuarioController extends Controller
             'status',
             'password',
         ]);
+        $input['number_id'] = RequestNit::normalize($request->document_type, $request->number_id);
         if (!empty($input['password'])) {
             $input['password'] = Hash::make($input['password']);
         } else {

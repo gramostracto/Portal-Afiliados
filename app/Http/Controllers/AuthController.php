@@ -41,7 +41,7 @@ class AuthController extends Controller
         $request->Validator([
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'email', 'max:255', 'unique:users', 'indisposable'],
-            'number_id' => ['required', 'numeric', 'unique:users',],
+            'number_id' => ['required', RequestNit::rule(fn() => $request->document_type)],
             'phone' => ['required', 'digits_between:7,11'],
             'document_type' => ['required'],
             'password' => ['required', 'string', 'min:8', 'confirmed'],
@@ -58,7 +58,7 @@ class AuthController extends Controller
         $id = User::insertGetId([
             'name'                  => $request['name'],
             'email'                 => $request['email'],
-            'number_id'        => $request['number_id'],
+            'number_id'        => RequestNit::normalize($request['document_type'], $request['number_id']),
             'document_type'          => $request['document_type'],
             'phone'              => $request['phone'],
             'status'                => 'NUEVO',

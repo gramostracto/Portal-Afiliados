@@ -67,9 +67,14 @@ class HomeController extends Controller
 
         $number_id    = $user->number_id;
         $documentType = $user->document_type;
-        $taxpayerId     = ($documentType == "NIT") ? RequestNit::getNit($number_id) : $number_id;
 
-        $supplierNumber = $this->findSupplierNumber($taxpayerId);
+        $supplierNumber = ['status' => 404, 'body' => 'Supplier not found'];
+        foreach (RequestNit::candidates($number_id, $documentType) as $taxpayerId) {
+            $supplierNumber = $this->findSupplierNumber($taxpayerId);
+            if ($supplierNumber['status'] !== 404) {
+                break;
+            }
+        }
 
         if ($supplierNumber['status'] === 404) {
             return response()->view('error_pages.proveedorNoEncontrado', [

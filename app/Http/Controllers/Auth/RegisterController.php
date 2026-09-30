@@ -7,6 +7,7 @@ use App\Http\Controllers\Controller;
 use App\Providers\RouteServiceProvider;
 use Spatie\Permission\Models\Role;
 use Spatie\Permission\Models\Permission;
+use App\Http\Helpers\RequestNit;
 use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Auth\Events\Registered;
@@ -61,10 +62,18 @@ class RegisterController extends Controller
      */
     protected function validator(array $data)
     {
+        $isNit = ($data['document_type'] ?? null) === 'NIT';
+
         return Validator::make($data, [
             'name'          => ['required', 'string', 'max:255'],
             'email'         => ['required', 'string', 'email', 'max:255', 'unique:users', 'indisposable'],
-            'number_id'     => ['required', 'numeric', 'unique:users'],
+            'number_id'     => ['required', RequestNit::rule(fn() => $data['document_type'] ?? null)],
+            'dv'            => $isNit ? ['required', 'digits:1', function ($attribute, $value, $fail) use ($data) {
+                $expected = substr((string) RequestNit::normalize('NIT', $data['number_id'] ?? ''), -1);
+                if ((string) $value !== $expected) {
+                    $fail('El dígito de verificación no corresponde al NIT ingresado.');
+                }
+            }] : ['nullable'],
             'phone'         => ['required', 'digits_between:7,11'],
             'document_type' => ['required'],
             'password'      => ['required', 'string', 'min:8', 'confirmed'],
@@ -319,7 +328,10 @@ class RegisterController extends Controller
     {
         $this->validator($request->all())->validate();
 
-        event(new Registered($this->create($request->all())));
+        $data = $request->all();
+        $data['number_id'] = RequestNit::normalize($data['document_type'], $data['number_id']);
+
+        event(new Registered($this->create($data)));
 
         // self::notificationActionPusher();
         // SendEmailRequestNotification::sendEmail($request->name);

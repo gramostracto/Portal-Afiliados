@@ -409,7 +409,7 @@
                                                         <div class="form-group">
                                                             <label for="identification"
                                                                 class="form-label">Identificación</label>
-                                                            <input id="identification" type="number"
+                                                            <input id="identification" type="text" inputmode="numeric" pattern="[0-9\-]*"
                                                                 class="form-control{{ $errors->has('identification') ? ' is-invalid' : '' }}"
                                                                 name="identification" tabindex="1"
                                                                 placeholder="Numero Identificacion"

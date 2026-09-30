@@ -327,24 +327,7 @@ class ConsultarAfiliadoController extends Controller
 
             $document = ($documentType == "NIT") ? RequestNit::getNit($number_id) : $number_id;
 
-            $documentCandidates = [(string) $document];
-            $normalizedNumberId = preg_replace('/\D+/', '', (string) $number_id);
-
-            if ($documentType == "NIT") {
-                if ($normalizedNumberId !== '') {
-                    $withDv = RequestNit::getNit($normalizedNumberId);
-                    if ($withDv && !in_array($withDv, $documentCandidates, true)) {
-                        $documentCandidates[] = $withDv;
-                    }
-                }
-
-                if (str_contains($document, '-')) {
-                    $withoutDv = str_replace('-', '', $document);
-                    if (!in_array($withoutDv, $documentCandidates, true)) {
-                        $documentCandidates[] = $withoutDv;
-                    }
-                }
-            }
+            $documentCandidates = RequestNit::candidates($number_id, $documentType);
 
             $SupplierNumber = null;
             foreach ($documentCandidates as $candidate) {
@@ -513,7 +496,13 @@ class ConsultarAfiliadoController extends Controller
                 'fields'  => 'locationXid,locationName,isActive,contacts'
             ];
 
-            $response = OracleRestOtm::getLocationsCustomers($document, $params);
+            $response = null;
+            foreach (RequestNit::candidates($userData->number_id, $userData->document_type) as $candidate) {
+                $response = OracleRestOtm::getLocationsCustomers($candidate, $params);
+                if ($response->successful()) {
+                    break;
+                }
+            }
             if ($response->successful()) {
                 $result          = $response->object();
                 if (!is_object($result)) {
